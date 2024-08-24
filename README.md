@@ -2,6 +2,7 @@
 Grupo 2. Algoritmos I - Licenciatura en Ciencia de Datos. 
 
 ### Clonar el Repositorio
+Ruta encontrada en CODE -> HTTPS
 ```
 git clone https://github.com/usuario/proyecto.git
 ```
