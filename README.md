@@ -1,6 +1,7 @@
 # TPI-AlgoritmosI
-Grupo 2. Algoritmos I - Licenciatura en Ciencia de Datos. 
+**Grupo 2. Algoritmos I - Licenciatura en Ciencia de Datos.**
 
+## Guía de comandos GIT
 ### Clonar el Repositorio
 Ruta encontrada en CODE -> HTTPS
 ```
