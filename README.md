@@ -7,15 +7,14 @@ Ruta encontrada en CODE -> HTTPS
 ```
 git clone https://github.com/usuario/proyecto.git
 ```
-
 ### Crear una Rama Nueva
 ```
-git checkout nombredelarama
-```
-
-### Ir a la Rama
-```
 git branch nombredelarama
+```
+### Ir a la rama
+```
+git checkout nombredelarama
+
 ```
 
 ### Añade las modificaciones a la Rama
