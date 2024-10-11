@@ -22,6 +22,5 @@ public class Columna<T> {
     public List<Celda<T>> getColumna() {
         return celdas; //retorna las celdas de la columna
     }
-
-
+    
 }
