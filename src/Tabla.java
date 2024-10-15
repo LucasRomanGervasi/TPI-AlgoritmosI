@@ -87,4 +87,39 @@ public class Tabla {
         return columnas.get(indicesColumnas.get(etiquetaColumna));
     }
 
+    public void visualizar(int maxFilas, int maxColumnas, int maxAnchoCelda) {
+        int totalFilas = filas.size();
+        int totalColumnas = columnas.size();
+
+        int filasMostrar = Math.min(maxFilas, totalFilas);
+        int columnasMostrar = Math.min(maxColumnas, totalColumnas);
+
+        System.out.print(String.format("%-15s", ""));
+        for (int i = 0; i < columnasMostrar; i++) {
+            String etiqueta = columnas.get(i).getEtiquetaColumna();
+            System.out.print(etiqueta + " ".repeat(maxAnchoCelda - etiqueta.length()));
+        }
+        System.out.println();
+
+        for (int i = 0; i < filasMostrar; i++) {
+            Fila fila = filas.get(i);
+            System.out.print(String.format("%-15s", fila.getEtiquetaFila()));
+
+            for (int j = 0; j < columnasMostrar; j++) {
+                Object valor = fila.getFila().get(j).getValor();
+                String textoCelda = (valor == null) ? "NA" : valor.toString();
+                System.out.print(textoCelda + " ".repeat(maxAnchoCelda - textoCelda.length()));
+            }
+            System.out.println();
+        }
+
+        if (totalFilas > filasMostrar) {
+            System.out.println("... (" + (totalFilas - filasMostrar) + " filas más)");
+        }
+        if (totalColumnas > columnasMostrar) {
+            System.out.println("... (" + (totalColumnas - columnasMostrar) + " columnas más)");
+        }
+        
+    }
+
 }
