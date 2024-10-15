@@ -3,6 +3,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import Excepciones.EtiquetaInvalida;
+import Excepciones.TipoIncompatible;
 
 
 public class Tabla {
@@ -49,10 +50,13 @@ public class Tabla {
         return (Class<T>) columnas.get(indicesColumnas.get(etiqueta)).getTipoDato();
     }
 
-    public <T> void agregarColumna(String etiqueta, Class<T> tipoDato) {
-        Columna<T> nuevaColumna = new Columna<>(etiqueta, tipoDato);
-        columnas.add(nuevaColumna);
-        indicesColumnas.put(etiqueta, columnas.size() - 1);
+    public <T> void agregarColumna(String etiqueta, Class<T> tipoDato) throws TipoIncompatible {
+    if (!(tipoDato == Integer.class || tipoDato == Double.class || tipoDato == Boolean.class || tipoDato == String.class)) {
+        throw new TipoIncompatible("Tipo de dato no soportado. Solo se permiten: Numérico (entero, real), Booleano y Cadena.");
+    }
+    Columna<T> nuevaColumna = new Columna<>(etiqueta, tipoDato);
+    columnas.add(nuevaColumna);
+    indicesColumnas.put(etiqueta, columnas.size() - 1);
     }
 
     public void agregarFila(String etiqueta) {
