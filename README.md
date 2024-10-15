@@ -1,18 +1,31 @@
-## Getting Started
+# TPI-AlgoritmosI
+**Grupo 2. Algoritmos I - Licenciatura en Ciencia de Datos.**
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+## Guía de comandos GIT
+### Clonar el Repositorio
+Ruta encontrada en CODE -> HTTPS
+```
+git clone https://github.com/usuario/proyecto.git
+```
+### Crear una Rama Nueva
+```
+git branch nombredelarama
+```
+### Ir a la rama
+```
+git checkout nombredelarama
 
-## Folder Structure
+```
 
-The workspace contains two folders by default, where:
+### Añade las modificaciones a la Rama
+```
+git add .
+```
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
+### Commit con descripción de lo modificado
+```
+git commit -m "Descripción del cambio realizado"
+```
 
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
-
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
-
-## Dependency Management
-
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+###
+Coloca el cursor sobre un mensaje para fijarlo
