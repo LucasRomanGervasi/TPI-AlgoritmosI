@@ -29,9 +29,13 @@ public class Fila {
             throw new IndexOutOfBoundsException("El índice está fuera de rango");
         }
 
-        // Si los tipos coinciden, actualizamos el valor de la celda
-        celdas.get(i).setValor(valor);
-    }
+        Celda<?> celda = celdas.get(i);
+        if (!celda.getValor().getClass().isInstance(valor)) {
+            throw new TipoIncompatible("El tipo de dato no es compatible con la celda.");
+        }
+
+        celda.setValor(valor);
+        }
 
     // Método para agregar una celda a la fila
     public void agregarCelda(Celda<?> celda) {
