@@ -29,11 +29,6 @@ public class Fila {
             throw new IndexOutOfBoundsException("El índice está fuera de rango");
         }
 
-        // Verificamos si el valor de la celda actual y el valor nuevo son del mismo tipo
-        if (!celdas.get(i).getValor().getClass().equals(valor.getClass())) {
-            throw new TipoIncompatible("El tipo de dato no es compatible con el tipo de la celda");
-        }
-
         // Si los tipos coinciden, actualizamos el valor de la celda
         celdas.get(i).setValor(valor);
     }
