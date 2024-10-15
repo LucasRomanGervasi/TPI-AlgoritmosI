@@ -6,14 +6,20 @@ import Excepciones.TipoIncompatible;
 public class Columna<T> {
     private String etiqueta;
     private List<Celda<T>> celdas;
+    private Class<T> tipoDato;
 
-    public Columna(String etiqueta) {
+    public Columna(String etiqueta, Class<T> tipoDato) {
         this.etiqueta = etiqueta;
         this.celdas = new ArrayList<>();
+        this.tipoDato = tipoDato;
     }
 
     public String getEtiquetaColumna() {
         return etiqueta; //retorna la etiqueta de la columna
+    }
+
+    public Class<T> getTipoDato() {
+        return tipoDato; //retorna el tipo de dato de la columna
     }
 
     public void agregarCelda(T valor) throws TipoIncompatible {
@@ -38,5 +44,6 @@ public class Columna<T> {
 
         return datosConEtiqueta; // Retorna la lista con etiqueta y valores
     }
+
 }
 
