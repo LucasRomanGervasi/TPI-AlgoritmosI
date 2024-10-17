@@ -4,18 +4,18 @@ import java.util.List;
 import Excepciones.TipoIncompatible;
 
 public class Fila {
-    private String etiqueta;
+    private int id; // ID que identifica la fila
     private List<Celda<?>> celdas; // Lista de celdas en la fila
 
-    // Constructor que inicializa la fila con su etiqueta
-    public Fila(String etiqueta) {
-        this.etiqueta = etiqueta;
+    // Constructor que inicializa la fila con su ID
+    public Fila(int id) {
+        this.id = id;
         this.celdas = new ArrayList<>();
     }
 
-    // Retorna la etiqueta de la fila
-    public String getEtiquetaFila() {
-        return etiqueta;
+    // Retorna el ID de la fila
+    public int getID() {
+        return id;
     }
 
     // Retorna la lista de celdas de la fila
@@ -35,11 +35,22 @@ public class Fila {
         }
 
         celda.setValor(valor);
-        }
+    }
 
     // Método para agregar una celda a la fila
     public void agregarCelda(Celda<?> celda) {
         celdas.add(celda);
     }
+
+    // Método para visualizar la fila, incluyendo su ID al principio
+    public void visualizarFila() {
+        System.out.print("ID: " + id + " | "); // Imprimir el ID de la fila
+        for (Celda<?> celda : celdas) {
+            Object valor = celda.getValor();
+            System.out.print((valor != null ? valor.toString() : "NA") + " | ");
+        }
+        System.out.println();
+    }
 }
+
 
