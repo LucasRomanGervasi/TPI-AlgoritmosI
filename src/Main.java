@@ -30,7 +30,7 @@ public class Main {
             // Visualizar la tabla
             tabla.visualizar(3, 3, 10);
         } catch (EtiquetaInvalida | TipoIncompatible e) {
-            System.out.println(e.getMessage());
+            System.out.println(e.getMessage()); //tiene sentido que el try catch esté en el main?
         }
     }
 }
