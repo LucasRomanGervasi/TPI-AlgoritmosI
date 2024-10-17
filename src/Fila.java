@@ -18,6 +18,10 @@ public class Fila {
         return id;
     }
 
+    public void setID(int nuevoID) {
+        this.id = nuevoID;
+    }
+
     // Retorna la lista de celdas de la fila
     public List<Celda<?>> getFila() {
         return celdas;
