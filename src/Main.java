@@ -1,3 +1,5 @@
+import java.util.List;
+
 import Excepciones.EtiquetaInvalida;
 import Excepciones.TipoIncompatible;
 
@@ -36,8 +38,8 @@ public class Main {
             tabla.visualizar(5, 3, 10); // Visualizar tabla con datos
 
             // Eliminar una columna y visualizar la tabla modificada
-            tabla.eliminarColumna("Edad");
-            System.out.println("\nTabla después de eliminar la columna 'Edad':");
+            tabla.eliminarColumna("Altura");
+            System.out.println("\nTabla después de eliminar la columna 'Altura':");
             tabla.visualizar(5, 2, 10); // Ahora solo dos columnas visibles
 
             // Eliminar una fila y visualizar la tabla modificada
@@ -50,9 +52,31 @@ public class Main {
             System.out.println("\nTabla después de modificar la edad de Juan:");
             tabla.visualizar(5, 2, 10); // Visualizar con cambios
 
+
+            System.out.println("Muestrear el 50% de las filas:");
+            tabla.muestrear(50, 10);  // 50% de las filas, con ancho máximo de celda 10
+
         } catch (EtiquetaInvalida | TipoIncompatible e) {
             System.out.println(e.getMessage());
         }
+
+        // Seleccionar filas y columnas específicas
+        System.out.println("Selección parcial:");
+        List<String> columnas = List.of("Nombre", "Altura");
+        List<Integer> filas = List.of(0, 2); // Solo filas 0 y 2
+        try {
+            tabla.seleccionar(columnas, filas, 10);  // Max ancho de celda: 10
+        } catch (EtiquetaInvalida e) {
+            System.out.println(e.getMessage());
+        }
+
+        // Mostrar las primeras 2 filas
+        System.out.println("\nHead(1):");
+        tabla.head(1, 10);
+
+        // Mostrar las últimas 2 filas
+        System.out.println("\nTail(1):");
+        tabla.tail(1, 10);
     }
 }
 

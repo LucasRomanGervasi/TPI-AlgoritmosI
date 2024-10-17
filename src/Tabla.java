@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.HashMap;
 import Excepciones.EtiquetaInvalida;
 import Excepciones.TipoIncompatible;
@@ -178,6 +179,131 @@ public class Tabla {
         }
         return filas.get(idFila);
     }
+
+    public void muestrear(double porcentaje, int maxAnchoCelda) {
+    if (porcentaje < 0 || porcentaje > 100) {
+        throw new IllegalArgumentException("El porcentaje debe estar entre 0 y 100.");
+    }
+
+    int totalFilas = filas.size();
+    int totalColumnas = columnas.size();
+
+    // Calcular la cantidad de filas a muestrear en base al porcentaje
+    int filasAMostrar = (int) Math.ceil((porcentaje / 100) * totalFilas);
+    
+    if (filasAMostrar == 0) {
+        System.out.println("No hay filas suficientes para muestrear.");
+        return;
+    }
+
+    // Seleccionar índices de filas de forma aleatoria
+    Random random = new Random();
+    List<Integer> indicesAleatorios = new ArrayList<>();
+    
+    while (indicesAleatorios.size() < filasAMostrar) {
+        int indiceAleatorio = random.nextInt(totalFilas);
+        if (!indicesAleatorios.contains(indiceAleatorio)) {
+            indicesAleatorios.add(indiceAleatorio);
+        }
+    }
+
+    // Imprimir etiquetas de columnas
+    System.out.print(String.format("%-" + (maxAnchoCelda + 1) + "s", "")); // Espacio para las etiquetas de filas
+    for (int i = 0; i < totalColumnas; i++) {
+        String etiqueta = columnas.get(i).getEtiquetaColumna();
+        System.out.print(formatearTexto(etiqueta, maxAnchoCelda) + " ");
+    }
+    System.out.println();
+
+    // Imprimir las filas seleccionadas
+    for (int indiceFila : indicesAleatorios) {
+        Fila fila = filas.get(indiceFila);
+        System.out.print(formatearTexto(fila.getID() + "", maxAnchoCelda) + " "); // Imprime el ID de la fila
+
+        for (int j = 0; j < totalColumnas; j++) {
+            Object valor = fila.getFila().get(j).getValor();
+            String textoCelda = (valor == null) ? "NA" : valor.toString();
+            System.out.print(formatearTexto(textoCelda, maxAnchoCelda) + " ");
+        }
+        System.out.println();
+        }
+    }
+    public void seleccionar(List<String> etiquetasColumnas, List<Integer> indicesFilas, int maxAnchoCelda) throws EtiquetaInvalida {
+        // Validar que las etiquetas de columnas existan
+        List<Integer> columnasASeleccionar = new ArrayList<>();
+        for (String etiqueta : etiquetasColumnas) {
+            if (!indicesColumnas.containsKey(etiqueta)) {
+                throw new EtiquetaInvalida("La etiqueta de la columna '" + etiqueta + "' no existe.");
+            }
+            columnasASeleccionar.add(indicesColumnas.get(etiqueta));
+        }
+    
+        // Validar que los índices de filas sean válidos
+        for (int indiceFila : indicesFilas) {
+            if (indiceFila < 0 || indiceFila >= filas.size()) {
+                throw new EtiquetaInvalida("El índice de fila '" + indiceFila + "' no es válido.");
+            }
+        }
+    
+        // Imprimir las etiquetas de las columnas seleccionadas
+        System.out.print(String.format("%-" + (maxAnchoCelda + 1) + "s", "")); // Espacio para los IDs de las filas
+        for (int indiceColumna : columnasASeleccionar) {
+            String etiqueta = columnas.get(indiceColumna).getEtiquetaColumna();
+            System.out.print(formatearTexto(etiqueta, maxAnchoCelda) + " ");
+        }
+        System.out.println();
+    
+        // Imprimir las filas seleccionadas
+        for (int indiceFila : indicesFilas) {
+            Fila fila = filas.get(indiceFila);
+            System.out.print(formatearTexto(fila.getID() + "", maxAnchoCelda) + " "); // Imprime el ID de la fila
+    
+            for (int indiceColumna : columnasASeleccionar) {
+                Object valor = fila.getFila().get(indiceColumna).getValor();
+                String textoCelda = (valor == null) ? "NA" : valor.toString();
+                System.out.print(formatearTexto(textoCelda, maxAnchoCelda) + " ");
+            }
+            System.out.println();
+        }
+    }
+    public void head(int x, int maxAnchoCelda) {
+        if (x <= 0) {
+            System.out.println("Debe seleccionar al menos una fila.");
+            return;
+        }
+        int filasMostrar = Math.min(x, filas.size());
+        visualizar(filasMostrar, columnas.size(), maxAnchoCelda);
+    } //PREGUNTAR COMO SON LOS METODOS HEAD Y TAIL
+    public void tail(int x, int maxAnchoCelda) {
+        if (x <= 0) {
+            System.out.println("Debe seleccionar al menos una fila.");
+            return;
+        }
+        int totalFilas = filas.size();
+        int filasMostrar = Math.min(x, totalFilas);
+    
+        // Imprimir etiquetas de columnas
+        System.out.print(String.format("%-" + (maxAnchoCelda + 1) + "s", "")); // Espacio para las etiquetas de filas
+        for (int i = 0; i < columnas.size(); i++) {
+            String etiqueta = columnas.get(i).getEtiquetaColumna();
+            System.out.print(formatearTexto(etiqueta, maxAnchoCelda) + " ");
+        }
+        System.out.println();
+    
+        // Imprimir las últimas 'x' filas
+        for (int i = totalFilas - filasMostrar; i < totalFilas; i++) {
+            Fila fila = filas.get(i);
+            System.out.print(formatearTexto(fila.getID() + "", maxAnchoCelda) + " "); // Imprime el ID de la fila
+    
+            for (int j = 0; j < columnas.size(); j++) {
+                Object valor = fila.getFila().get(j).getValor();
+                String textoCelda = (valor == null) ? "NA" : valor.toString();
+                System.out.print(formatearTexto(textoCelda, maxAnchoCelda) + " ");
+            }
+            System.out.println();
+        }
+    }
+    
 }
 
 
