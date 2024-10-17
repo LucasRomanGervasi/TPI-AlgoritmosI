@@ -93,29 +93,32 @@ public class Tabla {
     public void visualizar(int maxFilas, int maxColumnas, int maxAnchoCelda) {
         int totalFilas = filas.size();
         int totalColumnas = columnas.size();
-
+    
         int filasMostrar = Math.min(maxFilas, totalFilas);
         int columnasMostrar = Math.min(maxColumnas, totalColumnas);
-
-        System.out.print(String.format("%-10s", "ID"));
+    
+        // Imprimir etiquetas de columnas
+        System.out.print(String.format("%-" + (maxAnchoCelda + 1) + "s", "")); // Espacio para las etiquetas de filas
         for (int i = 0; i < columnasMostrar; i++) {
             String etiqueta = columnas.get(i).getEtiquetaColumna();
-            System.out.print(etiqueta + " ".repeat(maxAnchoCelda - etiqueta.length()));
+            System.out.print(formatearTexto(etiqueta, maxAnchoCelda) + " ");
         }
         System.out.println();
-
+    
+        // Imprimir filas y sus celdas
         for (int i = 0; i < filasMostrar; i++) {
             Fila fila = filas.get(i);
-            System.out.print(String.format("%-10s", fila.getID()));
-
+            System.out.print(formatearTexto(fila.getID() + "", maxAnchoCelda) + " "); // Imprime el ID de la fila
+    
             for (int j = 0; j < columnasMostrar; j++) {
                 Object valor = fila.getFila().get(j).getValor();
                 String textoCelda = (valor == null) ? "NA" : valor.toString();
-                System.out.print(textoCelda + " ".repeat(maxAnchoCelda - textoCelda.length()));
+                System.out.print(formatearTexto(textoCelda, maxAnchoCelda) + " ");
             }
             System.out.println();
         }
-
+    
+        // Mostrar resumen si hay más filas o columnas de las que se imprimen
         if (totalFilas > filasMostrar) {
             System.out.println("... (" + (totalFilas - filasMostrar) + " filas más)");
         }
@@ -123,5 +126,58 @@ public class Tabla {
             System.out.println("... (" + (totalColumnas - columnasMostrar) + " columnas más)");
         }
     }
+    
+    // Método auxiliar para truncar o rellenar con espacios los textos de las celdas
+    private String formatearTexto(String texto, int maxAncho) {
+        // Si el texto es más largo que el máximo ancho permitido, lo truncamos
+        if (texto.length() > maxAncho) {
+            return texto.substring(0, maxAncho);
+        }
+    
+        // Si el texto es más corto, lo rellenamos con espacios
+        return String.format("%-" + maxAncho + "s", texto);
+    }
+
+    public void eliminarColumna(String etiqueta) throws EtiquetaInvalida {
+        if (!indicesColumnas.containsKey(etiqueta)) {
+            throw new EtiquetaInvalida("La etiqueta de la columna no existe.");
+        }
+        int columnaIndex = indicesColumnas.get(etiqueta);
+        columnas.remove(columnaIndex);
+        indicesColumnas.remove(etiqueta);
+
+        // Actualizar índices de las columnas
+        for (int i = columnaIndex; i < columnas.size(); i++) {
+            String nuevaEtiqueta = columnas.get(i).getEtiquetaColumna();
+            indicesColumnas.put(nuevaEtiqueta, i);
+        }
+    }
+
+    public void eliminarFila(int idFila) throws EtiquetaInvalida {
+        if (idFila < 0 || idFila >= filas.size()) {
+            throw new EtiquetaInvalida("El ID de la fila no existe.");
+        }
+        filas.remove(idFila);
+
+        // Actualizar IDs de las filas
+        for (int i = idFila; i < filas.size(); i++) {
+            filas.get(i).setID(i);
+        }
+    }
+
+    public Columna getColumna(String etiqueta) throws EtiquetaInvalida {
+        if (!indicesColumnas.containsKey(etiqueta)) {
+            throw new EtiquetaInvalida("La etiqueta de la columna no existe.");
+        }
+        return columnas.get(indicesColumnas.get(etiqueta));
+    }
+
+    public Fila getFila(int idFila) throws EtiquetaInvalida {
+        if (idFila < 0 || idFila >= filas.size()) {
+            throw new EtiquetaInvalida("El ID de la fila no existe.");
+        }
+        return filas.get(idFila);
+    }
 }
+
 
