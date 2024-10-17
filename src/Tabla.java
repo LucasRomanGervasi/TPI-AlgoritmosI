@@ -1,10 +1,10 @@
+import Excepciones.EtiquetaInvalida;
+import Excepciones.TipoIncompatible;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.HashMap;
-import Excepciones.EtiquetaInvalida;
-import Excepciones.TipoIncompatible;
 
 public class Tabla {
     private List<Columna<?>> columnas;
@@ -303,7 +303,30 @@ public class Tabla {
             System.out.println();
         }
     }
+
+    public void eliminarTodosNAs() {
+        // Recorrer las filas y actualizar las celdas que tienen NA en cualquier columna
+        for (Fila fila : filas) {
+            for (int j = 0; j < fila.getFila().size(); j++) {
+                Celda<?> celda = fila.getFila().get(j);
+                Object valor = celda.getValor();
     
+                // Verificar si la celda es NA o equivalente
+                if (valor == null || 
+                    valor.equals("NA") || 
+                    valor.equals("NAN") || 
+                    valor.equals("null")) {
+                    // Intentar establecer el valor de la celda como cadena vacía
+                    try {
+                        fila.setValorCelda(j, ""); // Establece el valor como cadena vacía
+                    } catch (TipoIncompatible e) {
+                        // Manejo de la excepción en caso de tipo incompatible
+                        System.err.println("No se pudo establecer el valor vacío en la celda: " + e.getMessage());
+                    }
+                }
+            }
+        }
+    }
 }
 
 
