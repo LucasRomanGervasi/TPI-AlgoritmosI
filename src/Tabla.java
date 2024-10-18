@@ -70,7 +70,7 @@ public class Tabla {
 
         if (!tipoDato.isInstance(valor)) {
             throw new TipoIncompatible("El tipo de dato no coincide con el de la columna.");
-        }
+        }  //VERIFICAR ID QUE EXISTA
 
         // Si no existe la celda, la crea
         if (fila.getFila().size() <= columnaIndex) {
