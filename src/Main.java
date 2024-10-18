@@ -17,14 +17,14 @@ public class Main {
             tabla.visualizar(5, 3, 10); // Visualizar tabla vacía con 5 filas y 3 columnas como máximo
 
             // Agregar filas con IDs
-            tabla.agregarFila(0);
+            tabla.agregarFila(0); //etiqueta de fila y columna pueden ser enteros y strings
             tabla.agregarFila(1);
             tabla.agregarFila(2);
 
             // Asignar valores a las celdas
             tabla.setValorCelda(0, "Nombre", "Juan");
             tabla.setValorCelda(0, "Edad", 25);
-            tabla.setValorCelda(0, "Altura", 1.75);
+            tabla.setValorCelda(0, "Altura", 1.76);
 
             tabla.setValorCelda(1, "Nombre", "Ana");
             tabla.setValorCelda(1, "Edad", 30);
@@ -57,13 +57,13 @@ public class Main {
             tabla.muestrear(50, 10);  // 50% de las filas, con ancho máximo de celda 10
 
         } catch (EtiquetaInvalida | TipoIncompatible e) {
-            System.out.println(e.getMessage());
+            System.out.println(e.getMessage()); //no hace falta el try, catch. que corte la ejecucion
         }
 
         // Seleccionar filas y columnas específicas
         System.out.println("Selección parcial:");
-        List<String> columnas = List.of("Nombre", "Altura");
-        List<Integer> filas = List.of(0, 2); // Solo filas 0 y 2
+        List<String> columnas = Arrays.asList("Nombre", "Edad"); // Usa Arrays.asList en lugar de List.of
+        List<Integer> filas = Arrays.asList(0, 1);  // Solo filas 0 y 2
         try {
             tabla.seleccionar(columnas, filas, 10);  // Max ancho de celda: 10
         } catch (EtiquetaInvalida e) {
