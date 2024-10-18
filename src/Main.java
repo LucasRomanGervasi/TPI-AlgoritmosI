@@ -77,7 +77,32 @@ public class Main {
         // Mostrar las últimas 2 filas
         System.out.println("\nTail(1):");
         tabla.tail(1, 10);
+
+
+        //PRUEBA DE CONCATENACION
+        System.out.println("\nPrueba de concatenación:");
+        try {
+            Tabla tabla1 = new Tabla();
+            tabla1.agregarColumna("Nombre", String.class);
+            tabla1.agregarColumna("Edad", Integer.class);
+            tabla1.agregarFila(0);
+            tabla1.setValorCelda(0, "Nombre", "Ana");
+            tabla1.setValorCelda(0, "Edad", 25);
+            tabla1.agregarFila(1);
+            tabla1.setValorCelda(1, "Nombre", "Luis");
+            tabla1.setValorCelda(1, "Edad", 30);
+            
+            Tabla tabla2 = new Tabla();
+            tabla2.agregarColumna("Nombre", String.class);
+            tabla2.agregarColumna("Edad", Integer.class);
+            tabla2.agregarFila(0);
+            tabla2.setValorCelda(0, "Nombre", "Carlos");
+            tabla2.setValorCelda(0, "Edad", 35);
+            
+            Tabla tablaConcatenada = tabla1.concatenar(tabla2);
+            tablaConcatenada.visualizar(10, 10, 10);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
-
-

@@ -1,10 +1,10 @@
+import Excepciones.EtiquetaInvalida;
+import Excepciones.TipoIncompatible;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.HashMap;
-import Excepciones.EtiquetaInvalida;
-import Excepciones.TipoIncompatible;
 
 public class Tabla {
     private List<Columna<?>> columnas;
@@ -302,6 +302,102 @@ public class Tabla {
             }
             System.out.println();
         }
+    }
+
+    public void eliminarTodosNAs() {
+        // Recorrer las filas y actualizar las celdas que tienen NA en cualquier columna
+        for (Fila fila : filas) {
+            for (int j = 0; j < fila.getFila().size(); j++) {
+                Celda<?> celda = fila.getFila().get(j);
+                Object valor = celda.getValor();
+    
+                // Verificar si la celda es NA o equivalente
+                if (valor == null || 
+                    valor.equals("NA") || 
+                    valor.equals("NAN") || 
+                    valor.equals("null")) {
+                    // Intentar establecer el valor de la celda como cadena vacía
+                    try {
+                        fila.setValorCelda(j, ""); // Establece el valor como cadena vacía
+                    } catch (TipoIncompatible e) {
+                        // Manejo de la excepción en caso de tipo incompatible
+                        System.err.println("No se pudo establecer el valor vacío en la celda: " + e.getMessage());
+                    }
+                }
+            }
+        }
+    }
+
+    public void rellenarColumna(String etiqueta, Object valor) throws EtiquetaInvalida, TipoIncompatible {
+        if (!indicesColumnas.containsKey(etiqueta)) {
+            throw new EtiquetaInvalida("La etiqueta de la columna no existe.");
+        }
+        int columnaIndex = indicesColumnas.get(etiqueta);
+        Columna<?> columna = columnas.get(columnaIndex);
+
+        // Verificar el tipo de dato y actualizar todas las celdas de la columna
+        Class<?> tipoDato = columna.getTipoDato();
+        if (!tipoDato.isInstance(valor)) {
+            throw new TipoIncompatible("El tipo de dato no coincide con el de la columna.");
+        }
+
+        for (Fila fila : filas) {
+            fila.setValorCelda(columnaIndex, valor);
+        }
+    }
+
+    public Tabla concatenar(Tabla otraTabla) throws TipoIncompatible, EtiquetaInvalida {
+        // Verificar que las dos tablas tienen el mismo número de columnas
+        if (this.getCantidadColumnas() != otraTabla.getCantidadColumnas()) {
+            throw new TipoIncompatible("Las tablas no tienen la misma cantidad de columnas.");
+        }
+    
+        // Verificar que las etiquetas de las columnas y los tipos coinciden
+        for (int i = 0; i < this.getCantidadColumnas(); i++) {
+            String etiquetaThis = this.columnas.get(i).getEtiquetaColumna();
+            String etiquetaOtra = otraTabla.columnas.get(i).getEtiquetaColumna();
+            Class<?> tipoThis = this.columnas.get(i).getTipoDato();
+            Class<?> tipoOtra = otraTabla.columnas.get(i).getTipoDato();
+    
+            if (!etiquetaThis.equals(etiquetaOtra)) {
+                throw new EtiquetaInvalida("Las etiquetas de las columnas no coinciden: " + etiquetaThis + " vs " + etiquetaOtra);
+            }
+    
+            if (!tipoThis.equals(tipoOtra)) {
+                throw new TipoIncompatible("Los tipos de datos de las columnas no coinciden en la columna " + etiquetaThis);
+            }
+        }
+    
+        // Crear una nueva tabla para almacenar la concatenación
+        Tabla tablaConcatenada = new Tabla();
+    
+        // Agregar las columnas de la primera tabla a la nueva tabla
+        for (Columna<?> columna : this.columnas) {
+            tablaConcatenada.agregarColumna(columna.getEtiquetaColumna(), columna.getTipoDato());
+        }
+    
+        // Copiar las filas de la primera tabla a la nueva tabla
+        for (int i = 0; i < this.getCantidadFilas(); i++) {
+            Fila filaOriginal = this.getFila(i);
+            tablaConcatenada.agregarFila(i);
+            for (int j = 0; j < this.getCantidadColumnas(); j++) {
+                Object valorCelda = filaOriginal.getFila().get(j).getValor();
+                tablaConcatenada.setValorCelda(i, this.columnas.get(j).getEtiquetaColumna(), valorCelda);
+            }
+        }
+    
+        // Copiar las filas de la segunda tabla a la nueva tabla (continuando los IDs de fila)
+        int numeroFilasPrimeraTabla = this.getCantidadFilas();
+        for (int i = 0; i < otraTabla.getCantidadFilas(); i++) {
+            Fila filaOriginal = otraTabla.getFila(i);
+            tablaConcatenada.agregarFila(numeroFilasPrimeraTabla + i);
+            for (int j = 0; j < otraTabla.getCantidadColumnas(); j++) {
+                Object valorCelda = filaOriginal.getFila().get(j).getValor();
+                tablaConcatenada.setValorCelda(numeroFilasPrimeraTabla + i, otraTabla.columnas.get(j).getEtiquetaColumna(), valorCelda);
+            }
+        }
+    
+        return tablaConcatenada;
     }
     
 }
