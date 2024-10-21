@@ -1,20 +1,134 @@
 package ComponentesTabla;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 import Excepciones.EtiquetaInvalida;
 import Excepciones.TipoIncompatible;
-import java.util.Random;
-import java.util.Comparator;
+import java.io.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Tabla {
     private List<Columna<?>> columnas;
     private Map<String, Integer> indicesColumnas;
 
-    public Tabla() {
-        this.columnas = new ArrayList<>();
-        this.indicesColumnas = new HashMap<>();
+    // Constructor desde matriz
+    public Tabla(Object[][] matriz) {
+        try {
+            crearDesdeMatriz(matriz);
+        } catch (TipoIncompatible | EtiquetaInvalida e) {
+            System.err.println("Error al crear la tabla desde la matriz: " + e.getMessage());
+        }
+    }
+
+    // Constructor desde archivo CSV
+    public Tabla(String rutaArchivoCSV) {
+        try {
+            crearDesdeArchivoCSV(rutaArchivoCSV);
+        } catch (IOException e) {
+            System.err.println("Error de IO al leer el archivo CSV: " + e.getMessage());
+        } catch (TipoIncompatible | EtiquetaInvalida e) {
+            System.err.println("Error al crear la tabla desde el archivo CSV: " + e.getMessage());
+        }
+    }
+
+    // Constructor desde secuencia lineal
+    public Tabla(List<Object> secuenciaLineal) {
+        try {
+            crearDesdeSecuenciaLineal(secuenciaLineal);
+        } catch (TipoIncompatible | EtiquetaInvalida e) {
+            System.err.println("Error al crear la tabla desde la secuencia lineal: " + e.getMessage());
+        }
+    }
+
+    // Método para crear tabla desde matriz
+    private void crearDesdeMatriz(Object[][] matriz) throws TipoIncompatible, EtiquetaInvalida {
+        columnas = new ArrayList<>();
+        indicesColumnas = new HashMap<>();
+
+        if (matriz == null || matriz.length < 1) {
+            throw new IllegalArgumentException("La matriz es nula o no tiene suficientes filas.");
+        }
+
+        // Crear columnas basadas en la primera fila de la matriz (etiquetas)
+        for (int j = 0; j < matriz[0].length; j++) {
+            if (!(matriz[0][j] instanceof String)) {
+                throw new EtiquetaInvalida("La etiqueta de la columna debe ser un String.");
+            }
+
+            String etiqueta = matriz[0][j].toString();
+            if (matriz[1][j] == null) {
+                throw new TipoIncompatible("No se puede determinar el tipo de dato de una columna vacía.");
+            }
+            Class<?> tipoDato = matriz[1][j].getClass();
+            agregarColumna(etiqueta, tipoDato);
+        }
+
+        // Agregar filas a la tabla
+        for (int i = 1; i < matriz.length; i++) {
+            agregarFila();
+            for (int j = 0; j < matriz[i].length; j++) {
+                setValorCelda(i - 1, columnas.get(j).getEtiquetaColumna(), matriz[i][j]);
+            }
+        }
+    }
+
+    // Método para crear tabla desde archivo CSV
+    private void crearDesdeArchivoCSV(String rutaArchivoCSV) throws IOException, TipoIncompatible, EtiquetaInvalida {
+        if (rutaArchivoCSV == null || rutaArchivoCSV.isEmpty()) {
+            throw new IllegalArgumentException("La ruta del archivo CSV no puede estar vacía.");
+        }
+
+        List<List<String>> datos = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivoCSV))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                String[] valores = linea.split(",");
+                datos.add(Arrays.asList(valores));
+            }
+        }
+
+        if (datos.isEmpty()) {
+            throw new IOException("El archivo CSV está vacío.");
+        }
+
+        // Crear una matriz de objetos a partir de los datos
+        Object[][] matriz = new Object[datos.size()][datos.get(0).size()];
+        for (int i = 0; i < datos.size(); i++) {
+            for (int j = 0; j < datos.get(i).size(); j++) {
+                matriz[i][j] = datos.get(i).get(j);
+            }
+        }
+
+        crearDesdeMatriz(matriz);
+    }
+
+    // Método para crear tabla desde secuencia lineal
+    // Método para crear la tabla desde secuencia lineal
+private void crearDesdeSecuenciaLineal(List<Object> secuenciaLineal) throws TipoIncompatible, EtiquetaInvalida {
+        if (secuenciaLineal == null || secuenciaLineal.isEmpty()) {
+            throw new IllegalArgumentException("La secuencia lineal no puede estar vacía.");
+        }
+
+        columnas = new ArrayList<>();
+        indicesColumnas = new HashMap<>();
+
+        // Supongamos que el primer objeto define el tipo de columna
+        Object primerElemento = secuenciaLineal.get(0);
+        if (primerElemento instanceof List) {
+            List<?> primeraFila = (List<?>) primerElemento;
+            agregarColumna("Datos", primeraFila.get(0).getClass()); // Tipo de la primera celda de la primera fila
+
+            // Agregar filas a la tabla
+            for (Object filaObj : secuenciaLineal) {
+                if (filaObj instanceof List) {
+                    List<?> fila = (List<?>) filaObj;
+                    agregarFila();
+                    for (int i = 0; i < fila.size(); i++) {
+                        setValorCelda(getCantidadFilas() - 1, "Datos", fila.get(i)); // Agregar valor a la fila correspondiente
+                    }
+                }
+            }
+        } else {
+            throw new TipoIncompatible("La secuencia lineal debe contener listas de objetos.");
+        }
     }
 
     public int getCantidadColumnas() {
@@ -335,57 +449,55 @@ public class Tabla {
             }
         }
     
-        // Crear una nueva tabla para almacenar la concatenación
-        Tabla tablaConcatenada = new Tabla();
+        // Crear una nueva tabla para almacenar la concatenación, usando un formato de matriz
+        int totalFilas = this.getCantidadFilas() + otraTabla.getCantidadFilas();
+        Object[][] matrizInicial = new Object[totalFilas + 1][this.getCantidadColumnas()]; // +1 para la fila de etiquetas
     
-        // Agregar las columnas de la primera tabla a la nueva tabla
-        for (Columna<?> columna : this.columnas) {
-            tablaConcatenada.agregarColumna(columna.getEtiquetaColumna(), columna.getTipoDato());
+        // Agregar etiquetas de columna en la primera fila
+        for (int j = 0; j < this.getCantidadColumnas(); j++) {
+            matrizInicial[0][j] = this.columnas.get(j).getEtiquetaColumna();
         }
     
-        // Copiar las celdas de la primera tabla a la nueva tabla
+        // Agregar las filas de la primera tabla
         for (int i = 0; i < this.getCantidadFilas(); i++) {
-            tablaConcatenada.agregarFila(); // Agregar una nueva fila
             for (int j = 0; j < this.getCantidadColumnas(); j++) {
-                Object valorCelda = this.columnas.get(j).getValor(i);
-                tablaConcatenada.setValorCelda(i, this.columnas.get(j).getEtiquetaColumna(), valorCelda);
+                matrizInicial[i + 1][j] = this.columnas.get(j).getValor(i); // +1 para compensar la fila de etiquetas
             }
         }
     
-        // Copiar las celdas de la segunda tabla a la nueva tabla
-        int numeroFilasPrimeraTabla = this.getCantidadFilas();
+        // Agregar las filas de la segunda tabla
         for (int i = 0; i < otraTabla.getCantidadFilas(); i++) {
-            tablaConcatenada.agregarFila(); // Agregar una nueva fila
             for (int j = 0; j < otraTabla.getCantidadColumnas(); j++) {
-                Object valorCelda = otraTabla.columnas.get(j).getValor(i);
-                tablaConcatenada.setValorCelda(numeroFilasPrimeraTabla + i, otraTabla.columnas.get(j).getEtiquetaColumna(), valorCelda);
+                matrizInicial[this.getCantidadFilas() + i + 1][j] = otraTabla.columnas.get(j).getValor(i);
             }
         }
     
-        return tablaConcatenada;
+        // Crear la nueva tabla concatenada a partir de la matriz completa
+        return new Tabla(matrizInicial);
     }
+    
 
     public Tabla hacerCopiaProfunda(Tabla tabla) throws TipoIncompatible, EtiquetaInvalida {
-        Tabla tablaCopia = new Tabla();
-    
-        // Copiar las columnas de la tabla original a la tabla copia
+        // Crear una matriz que incluya espacio para las filas y las etiquetas
+        int totalFilas = tabla.getCantidadFilas();
+        Object[][] matrizInicial = new Object[totalFilas + 1][tabla.getCantidadColumnas()]; // +1 para la fila de etiquetas
+        
+        // Copiar las etiquetas de columna en la primera fila
         for (int i = 0; i < tabla.getCantidadColumnas(); i++) {
-            String etiqueta = tabla.columnas.get(i).getEtiquetaColumna();
-            Class<?> tipoDato = tabla.columnas.get(i).getTipoDato();
-            tablaCopia.agregarColumna(etiqueta, tipoDato);
+            matrizInicial[0][i] = tabla.columnas.get(i).getEtiquetaColumna();
         }
     
-        // Copiar las celdas de la tabla original a la tabla copia
-        for (int i = 0; i < tabla.getCantidadFilas(); i++) {
-            tablaCopia.agregarFila(); // Agregar una nueva fila
+        // Copiar los datos de las filas de la tabla original
+        for (int i = 0; i < totalFilas; i++) {
             for (int j = 0; j < tabla.getCantidadColumnas(); j++) {
-                Object valorCelda = tabla.columnas.get(j).getValor(i);
-                tablaCopia.setValorCelda(i, tabla.columnas.get(j).getEtiquetaColumna(), valorCelda);
+                matrizInicial[i + 1][j] = tabla.columnas.get(j).getValor(i); // +1 para dejar espacio a la fila de etiquetas
             }
         }
     
-        return tablaCopia;
+        // Crear la nueva tabla a partir de la matriz con etiquetas y datos copiados
+        return new Tabla(matrizInicial);
     }
+    
 
     public Tabla ordenar(Tabla tabla, List<String> etiquetasColumnas, boolean ascendente) throws EtiquetaInvalida, TipoIncompatible {
         // Hacer una copia profunda de la tabla original
@@ -403,27 +515,22 @@ public class Tabla {
             for (String etiqueta : etiquetasColumnas) {
                 Columna<?> columna;
                 try {
-
                     columna = tablaOrdenada.getColumna(etiqueta);
                     Object valor1 = columna.getValor(fila1);
                     Object valor2 = columna.getValor(fila2);
-                    // Comparar los valores de las celdas
                     if (valor1 == null && valor2 == null) return 0;
                     if (valor1 == null) return ascendente ? -1 : 1;
                     if (valor2 == null) return ascendente ? 1 : -1;
                     @SuppressWarnings("unchecked")
                     int comparacion = ((Comparable<Object>) valor1).compareTo(valor2);
-    
-                if (comparacion != 0) {
-                    return ascendente ? comparacion : -comparacion;
-                }
+                    if (comparacion != 0) {
+                        return ascendente ? comparacion : -comparacion;
+                    }
                 } catch (EtiquetaInvalida e) {
-
                     e.printStackTrace();
                 }
-    
             }
-            return 0; // Si son iguales en todas las columnas, no se cambia el orden
+            return 0;
         };
     
         // Obtener los índices de fila y ordenarlos
@@ -434,10 +541,12 @@ public class Tabla {
         indicesFilas.sort(comparadorFilas);
     
         // Crear una nueva tabla ordenada
-        Tabla nuevaTabla = new Tabla();
-        for (Columna<?> columna : tablaOrdenada.columnas) {
-            nuevaTabla.agregarColumna(columna.getEtiquetaColumna(), columna.getTipoDato());
+        Object[][] matrizInicial = new Object[1][tabla.getCantidadColumnas()];
+        for (int i = 0; i < tabla.getCantidadColumnas(); i++) {
+            matrizInicial[0][i] = tabla.columnas.get(i).getEtiquetaColumna();
         }
+        
+        Tabla nuevaTabla = new Tabla(matrizInicial);  // Usar matriz para inicializar
     
         // Agregar las filas ordenadas a la nueva tabla
         for (int filaOrdenada : indicesFilas) {
@@ -448,50 +557,51 @@ public class Tabla {
             }
         }
     
-        return nuevaTabla; // Retorna la nueva tabla ordenada
+        return nuevaTabla;
     }
     
     public Tabla filtrar(String query) throws EtiquetaInvalida, TipoIncompatible {
-        // Crear una nueva tabla que será el resultado del filtrado
-        Tabla tablaFiltrada = new Tabla();
+        // Crear una lista para almacenar las filas seleccionadas
+        List<Object[]> filasSeleccionadas = new ArrayList<>();
         
-        // Copiar las columnas de la tabla original a la nueva tabla filtrada
-        for (Columna<?> columna : this.columnas) {
-            tablaFiltrada.agregarColumna(columna.getEtiquetaColumna(), columna.getTipoDato());
+        // Crear la primera fila con las etiquetas de las columnas
+        Object[] etiquetas = new Object[getCantidadColumnas()];
+        for (int j = 0; j < getCantidadColumnas(); j++) {
+            etiquetas[j] = columnas.get(j).getEtiquetaColumna();  // Obtener las etiquetas de las columnas
         }
-    
-        // Obtener todas las filas que cumplan con el filtro
-        List<Integer> filasSeleccionadas = new ArrayList<>();
         
+        // Agregar la fila de etiquetas primero
+        filasSeleccionadas.add(etiquetas);
+        
+        // Obtener todas las filas que cumplan con el filtro
         for (int i = 0; i < getCantidadFilas(); i++) {
             if (evaluarFila(i, query)) {
-                filasSeleccionadas.add(i);
-            }
-        }
-        
-        // Agregar las filas seleccionadas a la nueva tabla
-        for (Integer fila : filasSeleccionadas) {
-            // Agregar una nueva fila (sin índice de retorno)
-            tablaFiltrada.agregarFila();
-            for (int j = 0; j < columnas.size(); j++) {
-                String etiqueta = columnas.get(j).getEtiquetaColumna();
-                Object valor = getCelda(fila, etiqueta);
-                // Usar la última fila agregada para establecer el valor
-                tablaFiltrada.setValorCelda(tablaFiltrada.getCantidadFilas() - 1, etiqueta, valor);
+                // Crear un array que representa una fila
+                Object[] valorFila = new Object[getCantidadColumnas()]; // Array para una fila
+                for (int j = 0; j < getCantidadColumnas(); j++) {
+                    valorFila[j] = columnas.get(j).getValor(i); // Obtener el valor de la columna
+                }
+                filasSeleccionadas.add(valorFila); // Agregar la fila a la lista
             }
         }
     
-        return tablaFiltrada;
+        // Si no se seleccionó ninguna fila, devolver una tabla vacía con solo etiquetas
+        if (filasSeleccionadas.size() == 1) { // Solo contiene etiquetas
+            throw new IllegalArgumentException("No se encontraron filas que coincidan con los criterios de filtrado.");  // Solo etiquetas sin datos
+        }
+    
+        // Crear la tabla filtrada a partir de la matriz de filas seleccionadas
+        return new Tabla(filasSeleccionadas.toArray(new Object[0][])); // Usar la lista de filas seleccionadas
     }
     
     
-
+    
     // Este método evalúa si una fila cumple con la condición del query
     private boolean evaluarFila(int fila, String query) throws EtiquetaInvalida {
         // Separar las condiciones utilizando operadores lógicos como delimitadores
         List<String> condiciones = new ArrayList<>();
         List<String> operadoresLogicos = new ArrayList<>();
-    
+
         // Identificar condiciones y operadores
         String[] partesQuery = query.split(" ");
         for (int i = 0; i < partesQuery.length; i++) {
@@ -499,18 +609,23 @@ public class Tabla {
             if (parte.equals("and") || parte.equals("or") || parte.equals("not")) {
                 operadoresLogicos.add(parte);
             } else {
-                condiciones.add(parte + " " + partesQuery[i + 1] + " " + partesQuery[i + 2]);
-                i += 2; // Saltar operador y valor
+                // Asegúrate de que el índice no exceda el tamaño del arreglo
+                if (i + 2 < partesQuery.length) {
+                    condiciones.add(partesQuery[i] + " " + partesQuery[i + 1] + " " + partesQuery[i + 2]);
+                    i += 2; // Saltar operador y valor
+                } else {
+                    throw new IllegalArgumentException("La condición está incompleta: " + parte);
+                }
             }
         }
-    
+
         boolean resultado = evaluarCondicionSimple(fila, condiciones.get(0));  // Evaluar la primera condición
-    
+
         // Evaluar las siguientes condiciones con operadores lógicos
         for (int i = 1; i < condiciones.size(); i++) {
             String operador = operadoresLogicos.get(i - 1);  // Obtenemos el operador previo a la condición
             boolean siguienteCondicion = evaluarCondicionSimple(fila, condiciones.get(i));
-    
+
             switch (operador) {
                 case "and":
                     resultado = resultado && siguienteCondicion;
@@ -523,40 +638,45 @@ public class Tabla {
                     break;
             }
         }
-    
+
         return resultado;
     }
 
     private boolean evaluarCondicionSimple(int fila, String condicion) throws EtiquetaInvalida {
         // Parsear la condición (por ejemplo, "columna1 > 3")
         String[] partes = condicion.split(" ");
+        if (partes.length != 3) {
+            throw new IllegalArgumentException("Condición no válida: " + condicion);
+        }
+        
         String columna = partes[0];
         String operador = partes[1];
         String valorStr = partes[2];
-    
-        Object valorCelda = getCelda(fila, columna);
+
+        Object valorCelda = getCelda(fila, columna); // Asegúrate de que getCelda maneje nombres de columnas
         return evaluarCondicion(valorCelda, operador, valorStr);
     }
 
-    // Este método compara el valor de la celda con el valor en el query
-    private boolean evaluarCondicion(Object valorCelda, String operador, String valorComparacion) {
-        if (valorCelda instanceof Integer || valorCelda instanceof Double) {
-            double valor = Double.parseDouble(valorCelda.toString());
-            double valorComp = Double.parseDouble(valorComparacion);
-            switch (operador) {
-                case ">": return valor > valorComp;
-                case "<": return valor < valorComp;
-                case "=": return valor == valorComp;
+
+        private boolean evaluarCondicion(Object valorCelda, String operador, String valorComparacion) {
+            if (valorCelda instanceof Number) { // Para Integer y Double
+                double valor = Double.parseDouble(valorCelda.toString());
+                double valorComp = Double.parseDouble(valorComparacion);
+                switch (operador) {
+                    case ">": return valor > valorComp;
+                    case "<": return valor < valorComp;
+                    case "=": return valor == valorComp;
+                }
+            } else if (valorCelda instanceof Boolean) {
+                boolean valor = Boolean.parseBoolean(valorCelda.toString());
+                boolean valorComp = Boolean.parseBoolean(valorComparacion);
+                return valor == valorComp;
+            } else if (valorCelda instanceof String) {
+                return valorCelda.equals(valorComparacion);
             }
-        } else if (valorCelda instanceof Boolean) {
-            boolean valor = Boolean.parseBoolean(valorCelda.toString());
-            boolean valorComp = Boolean.parseBoolean(valorComparacion);
-            return valor == valorComp;
-        } else if (valorCelda instanceof String) {
-            return valorCelda.equals(valorComparacion);
+            return false; // Si el tipo no es compatible
         }
-        return false;
-    }
+    
     
     
 }
