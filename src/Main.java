@@ -1,108 +1,127 @@
-import java.util.List;
-
+import ComponentesTabla.Tabla;
 import Excepciones.EtiquetaInvalida;
 import Excepciones.TipoIncompatible;
 
+
 public class Main {
     public static void main(String[] args) {
-        // Crear una tabla
-        Tabla tabla = new Tabla();
-
         try {
-            // Agregar columnas
+            Tabla tabla = new Tabla();
+
+            // Agregar columnas de diferentes tipos
             tabla.agregarColumna("Nombre", String.class);
             tabla.agregarColumna("Edad", Integer.class);
             tabla.agregarColumna("Altura", Double.class);
-            System.out.println("Tabla inicial (sin filas):");
-            tabla.visualizar(5, 3, 10); // Visualizar tabla vacía con 5 filas y 3 columnas como máximo
 
-            // Agregar filas con IDs
-            tabla.agregarFila(0);
-            tabla.agregarFila(1);
-            tabla.agregarFila(2);
+            // Visualizar la tabla vacía con las etiquetas de columna
+            System.out.println("Tabla inicial con columnas:");
+            tabla.visualizar(5, 5, 10, 0);
+            System.out.println();
 
-            // Asignar valores a las celdas
-            tabla.setValorCelda(0, "Nombre", "Juan");
-            tabla.setValorCelda(0, "Edad", 25);
-            tabla.setValorCelda(0, "Altura", 1.75);
+            // Agregar filas con datos
+            tabla.getColumna("Nombre").agregarCelda("Lucas");
+            tabla.getColumna("Edad").agregarCelda(25);
+            tabla.getColumna("Altura").agregarCelda(1.80);
 
-            tabla.setValorCelda(1, "Nombre", "Ana");
-            tabla.setValorCelda(1, "Edad", 30);
-            tabla.setValorCelda(1, "Altura", 1.60);
+            tabla.getColumna("Nombre").agregarCelda("Ana");
+            tabla.getColumna("Edad").agregarCelda(30);
+            tabla.getColumna("Altura").agregarCelda(1.65);
 
-            tabla.setValorCelda(2, "Nombre", "Pedro");
-            tabla.setValorCelda(2, "Edad", 20);
-            tabla.setValorCelda(2, "Altura", 1.80);
+            tabla.getColumna("Nombre").agregarCelda("Juan");
+            tabla.getColumna("Edad").agregarCelda(28);
+            tabla.getColumna("Altura").agregarCelda(1.75);
 
-            System.out.println("\nTabla con valores iniciales:");
-            tabla.visualizar(5, 3, 10); // Visualizar tabla con datos
+            // Visualizar la tabla con filas agregadas
+            System.out.println("Tabla después de agregar valores:");
+            tabla.visualizar(5, 5, 10, 0);
+            System.out.println();
 
-            // Eliminar una columna y visualizar la tabla modificada
+            // Modificar un valor específico (reemplazar el nombre "Lucas" con "Lucía")
+            tabla.getColumna("Nombre").setValor(0, "Lucía");
+
+            // Visualizar la tabla después de la modificación
+            System.out.println("Tabla después de modificar el valor de la primera fila:");
+            tabla.visualizar(5, 5, 10, 0);
+            System.out.println();
+
+            // Eliminar una columna (por ejemplo, "Altura")
             tabla.eliminarColumna("Altura");
-            System.out.println("\nTabla después de eliminar la columna 'Altura':");
-            tabla.visualizar(5, 2, 10); // Ahora solo dos columnas visibles
 
-            // Eliminar una fila y visualizar la tabla modificada
+            // Visualizar la tabla después de eliminar la columna "Altura":
+            System.out.println("Tabla después de eliminar la columna 'Altura':");
+            tabla.visualizar(5, 5, 10, 0);
+            System.out.println();
+
+            // Eliminar una fila (por ejemplo, la segunda fila con índice 1)
             tabla.eliminarFila(1);
-            System.out.println("\nTabla después de eliminar la fila con ID 1 (Ana):");
-            tabla.visualizar(5, 2, 10); // Visualizar con 2 columnas y 2 filas
 
-            // Modificar un valor y visualizar la tabla modificada
-            tabla.setValorCelda(0, "Edad", 26); // Cambiar la edad de Juan
-            System.out.println("\nTabla después de modificar la edad de Juan:");
-            tabla.visualizar(5, 2, 10); // Visualizar con cambios
+            // Visualizar la tabla después de eliminar la fila
+            System.out.println("Tabla después de eliminar la segunda fila:");
+            tabla.visualizar(5, 5, 10, 0);
+            System.out.println();
 
+            // Mostrar solo las primeras 2 filas (head)
+            System.out.println("Visualización de la primera fila:");
+            tabla.head(1);
+            System.out.println();
 
-            System.out.println("Muestrear el 50% de las filas:");
-            tabla.muestrear(50, 10);  // 50% de las filas, con ancho máximo de celda 10
+            // Mostrar solo las últimas 2 filas (tail)
+            System.out.println("Visualización de la ultima fila:");
+            tabla.tail(1);
+            System.out.println();
 
-        } catch (EtiquetaInvalida | TipoIncompatible e) {
-            System.out.println(e.getMessage());
-        }
+            // Eliminar todos los valores "NA"
+            //tabla.getColumna("Nombre").setValor(0, null);
+            //tabla.eliminarTodosNAs();
+            //System.out.println("Tabla después de eliminar todos los 'NA':");
+            //tabla.visualizar(5, 5, 10, 0);
+            //System.out.println();
 
-        // Seleccionar filas y columnas específicas
-        System.out.println("Selección parcial:");
-        List<String> columnas = List.of("Nombre", "Altura");
-        List<Integer> filas = List.of(0, 2); // Solo filas 0 y 2
-        try {
-            tabla.seleccionar(columnas, filas, 10);  // Max ancho de celda: 10
-        } catch (EtiquetaInvalida e) {
-            System.out.println(e.getMessage());
-        }
+            //PRUEBA ULTIMOS METODOS
 
-        // Mostrar las primeras 2 filas
-        System.out.println("\nHead(1):");
-        tabla.head(1, 10);
-
-        // Mostrar las últimas 2 filas
-        System.out.println("\nTail(1):");
-        tabla.tail(1, 10);
-
-
-        //PRUEBA DE CONCATENACION
-        System.out.println("\nPrueba de concatenación:");
-        try {
             Tabla tabla1 = new Tabla();
             tabla1.agregarColumna("Nombre", String.class);
             tabla1.agregarColumna("Edad", Integer.class);
-            tabla1.agregarFila(0);
-            tabla1.setValorCelda(0, "Nombre", "Ana");
-            tabla1.setValorCelda(0, "Edad", 25);
-            tabla1.agregarFila(1);
-            tabla1.setValorCelda(1, "Nombre", "Luis");
-            tabla1.setValorCelda(1, "Edad", 30);
-            
+            tabla1.agregarColumna("Activo", Boolean.class);
+
+            // Agregar filas a la primera tabla
+            tabla1.getColumna("Nombre").agregarCelda("Lucas");
+            tabla1.getColumna("Edad").agregarCelda(25);
+            tabla1.getColumna("Activo").agregarCelda(true);
+
+            tabla1.getColumna("Nombre").agregarCelda("María");
+            tabla1.getColumna("Edad").agregarCelda(30);
+            tabla1.getColumna("Activo").agregarCelda(false);
+
+            System.out.println("Tabla 1:");
+            tabla1.visualizar(3, 3, 10, 0); // Visualizar la tabla 1
+
+            // Crear la segunda tabla
             Tabla tabla2 = new Tabla();
             tabla2.agregarColumna("Nombre", String.class);
             tabla2.agregarColumna("Edad", Integer.class);
-            tabla2.agregarFila(0);
-            tabla2.setValorCelda(0, "Nombre", "Carlos");
-            tabla2.setValorCelda(0, "Edad", 35);
-            
+            tabla2.agregarColumna("Activo", Boolean.class);
+
+            // Agregar filas a la segunda tabla
+            tabla2.getColumna("Nombre").agregarCelda("Sofía");
+            tabla2.getColumna("Edad").agregarCelda(26);
+            tabla2.getColumna("Activo").agregarCelda(true);
+
+            tabla2.getColumna("Nombre").agregarCelda("Juan");
+            tabla2.getColumna("Edad").agregarCelda(28);
+            tabla2.getColumna("Activo").agregarCelda(false);
+
+            System.out.println("Tabla 2:");
+            tabla2.visualizar(3, 3, 10, 0); // Visualizar la tabla 2
+
+            // Concatenar las tablas
             Tabla tablaConcatenada = tabla1.concatenar(tabla2);
-            tablaConcatenada.visualizar(10, 10, 10);
-        } catch (Exception e) {
-            e.printStackTrace();
+
+            System.out.println("Tabla Concatenada:");
+            tablaConcatenada.visualizar(10, 3, 10, 0); // Visualizar la tabla concatenada
+
+        } catch (TipoIncompatible | EtiquetaInvalida e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 }
