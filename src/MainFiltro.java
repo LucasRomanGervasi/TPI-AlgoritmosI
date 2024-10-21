@@ -24,6 +24,18 @@ public class MainFiltro {
         } catch (EtiquetaInvalida | TipoIncompatible | IllegalArgumentException e) {
             System.err.println("Error al filtrar la tabla: " + e.getMessage());
         }
+
+
+        Tabla tablaCSV = new Tabla("C:/Users/lucas/OneDrive/Escritorio/dato (2).csv");
+        tablaCSV.visualizar(5, 5, 15, 0);
+        try {
+            Class tipodato = tablaCSV.getTipoDatoColumna("Columna1");
+            System.out.println("El tipo de dato de la columna es: " + tipodato.getName());
+        } catch (EtiquetaInvalida e) {
+            e.printStackTrace();
+        }
+
+        
     }
     
 

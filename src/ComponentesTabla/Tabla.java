@@ -3,7 +3,6 @@ import Excepciones.EtiquetaInvalida;
 import Excepciones.TipoIncompatible;
 import java.io.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Tabla {
     private List<Columna<?>> columnas;
@@ -75,7 +74,10 @@ public class Tabla {
         if (rutaArchivoCSV == null || rutaArchivoCSV.isEmpty()) {
             throw new IllegalArgumentException("La ruta del archivo CSV no puede estar vacía.");
         }
-
+    
+        columnas = new ArrayList<>();  // Inicializar la lista de columnas
+        indicesColumnas = new HashMap<>(); // Inicializar el mapa de índices
+    
         List<List<String>> datos = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivoCSV))) {
             String linea;
@@ -84,11 +86,11 @@ public class Tabla {
                 datos.add(Arrays.asList(valores));
             }
         }
-
+    
         if (datos.isEmpty()) {
             throw new IOException("El archivo CSV está vacío.");
         }
-
+    
         // Crear una matriz de objetos a partir de los datos
         Object[][] matriz = new Object[datos.size()][datos.get(0).size()];
         for (int i = 0; i < datos.size(); i++) {
@@ -96,13 +98,14 @@ public class Tabla {
                 matriz[i][j] = datos.get(i).get(j);
             }
         }
-
-        crearDesdeMatriz(matriz);
+    
+        crearDesdeMatriz(matriz);  // Crear la tabla a partir de la matriz generada
     }
+    
 
     // Método para crear tabla desde secuencia lineal
     // Método para crear la tabla desde secuencia lineal
-private void crearDesdeSecuenciaLineal(List<Object> secuenciaLineal) throws TipoIncompatible, EtiquetaInvalida {
+    private void crearDesdeSecuenciaLineal(List<Object> secuenciaLineal) throws TipoIncompatible, EtiquetaInvalida {
         if (secuenciaLineal == null || secuenciaLineal.isEmpty()) {
             throw new IllegalArgumentException("La secuencia lineal no puede estar vacía.");
         }
@@ -230,10 +233,10 @@ private void crearDesdeSecuenciaLineal(List<Object> secuenciaLineal) throws Tipo
     public void visualizar(int maxFilas, int maxColumnas, int maxAnchoCelda, int filaInicio) {
         int totalFilas = getCantidadFilas();
         int totalColumnas = getCantidadColumnas();
-        
+        //System.out.println(totalFilas + " filas x " + totalColumnas + " columnas");
         int filasMostrar = Math.min(maxFilas, totalFilas - filaInicio); // Ajusta filas a mostrar desde filaInicio
         int columnasMostrar = Math.min(maxColumnas, totalColumnas); // Ajusta columnas a mostrar
-        
+        //System.out.println(filasMostrar + " filas x " + columnasMostrar + " columnas");
         // Imprimir etiquetas de columnas
         System.out.print(String.format("%-" + (maxAnchoCelda + 1) + "s", "")); // Espacio para las etiquetas de filas
         for (int i = 0; i < columnasMostrar; i++) {
