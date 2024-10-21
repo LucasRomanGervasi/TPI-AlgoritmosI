@@ -1,12 +1,14 @@
 import ComponentesTabla.Tabla;
 import Excepciones.EtiquetaInvalida;
 import Excepciones.TipoIncompatible;
+import java.util.List;
+import java.util.ArrayList;
 
 
 public class Main {
     public static void main(String[] args) {
         try {
-            Tabla tabla = new Tabla();
+            /* Tabla tabla = new Tabla();
 
             // Agregar columnas de diferentes tipos
             tabla.agregarColumna("Nombre", String.class);
@@ -103,7 +105,7 @@ public class Main {
             tabla2.agregarColumna("Activo", Boolean.class);
 
             // Agregar filas a la segunda tabla
-            tabla2.getColumna("Nombre").agregarCelda("Sofía");
+            tabla2.getColumna("Nombre").agregarCelda("Sofia");
             tabla2.getColumna("Edad").agregarCelda(26);
             tabla2.getColumna("Activo").agregarCelda(true);
 
@@ -119,9 +121,93 @@ public class Main {
 
             System.out.println("Tabla Concatenada:");
             tablaConcatenada.visualizar(10, 3, 10, 0); // Visualizar la tabla concatenada
+            
+
+            //Prueba copia profunda
+            System.out.println("Tabla copia:");
+            Tabla tablaCopia = tabla1.hacerCopiaProfunda(tabla1);
+            tablaCopia.visualizar(3, 3, 10, 0); // Visualizar la tabla copia */
+
+            //Prueba ordenar    
+
+            /* Tabla tabla = new Tabla();
+
+        // Agregar las columnas a la tabla
+        tabla.agregarColumna("Nombre", String.class);
+        tabla.agregarColumna("Edad", Integer.class);
+        tabla.agregarColumna("Ciudad", String.class);
+
+        // Agregar filas con datos
+        tabla.agregarFila();
+        tabla.setValorCelda(0, "Nombre", "Ana");
+        tabla.setValorCelda(0, "Edad", 25);
+        tabla.setValorCelda(0, "Ciudad", "Buenos Aires");
+
+        tabla.agregarFila();
+        tabla.setValorCelda(1, "Nombre", "Juan");
+        tabla.setValorCelda(1, "Edad", 30);
+        tabla.setValorCelda(1, "Ciudad", "Córdoba");
+
+        tabla.agregarFila();
+        tabla.setValorCelda(2, "Nombre", "María");
+        tabla.setValorCelda(2, "Edad", 22);
+        tabla.setValorCelda(2, "Ciudad", "Rosario");
+
+        tabla.agregarFila();
+        tabla.setValorCelda(3, "Nombre", "Pedro");
+        tabla.setValorCelda(3, "Edad", 35);
+        tabla.setValorCelda(3, "Ciudad", "Mendoza");
+
+        // Imprimir la tabla original
+        System.out.println("Tabla Original:");
+        tabla.visualizar(10, 3, 10, 0);
+
+        // Ordenar la tabla por Edad en forma ascendente
+        List<String> columnasParaOrdenar = new ArrayList<>();
+        columnasParaOrdenar.add("Edad");
+
+        Tabla tablaOrdenadaPorEdad = tabla.ordenar(tabla, columnasParaOrdenar, false);
+
+        // Imprimir la tabla ordenada por Edad
+        System.out.println("\nTabla Ordenada por Edad (Descendente):");
+        tablaOrdenadaPorEdad.visualizar(10, 3, 10, 0);
+
+        // Ordenar la tabla por Nombre en forma descendente
+        columnasParaOrdenar.clear();
+        columnasParaOrdenar.add("Nombre");
+
+        Tabla tablaOrdenadaPorNombre = tabla.ordenar(tabla, columnasParaOrdenar, false);
+
+        // Imprimir la tabla ordenada por Nombre
+        System.out.println("\nTabla Ordenada por Nombre (Descendente):");
+        tablaOrdenadaPorNombre.visualizar(10, 3, 10, 0); */
+
+
+        Tabla miTabla = new Tabla();
+        miTabla.agregarColumna("Edad", Integer.class);
+        miTabla.agregarColumna("EsEstudiante", Boolean.class);
+
+        miTabla.agregarFila();
+        miTabla.setValorCelda(0, "Edad", 25);
+        miTabla.setValorCelda(0, "EsEstudiante", true);
+
+        miTabla.agregarFila();
+        miTabla.setValorCelda(1, "Edad", 30);
+        miTabla.setValorCelda(1, "EsEstudiante", false);
+
+        miTabla.agregarFila();
+        miTabla.setValorCelda(2, "Edad", 22);
+        miTabla.setValorCelda(2, "EsEstudiante", true);
+
+        // Filtrar filas donde Edad > 23 y EsEstudiante es true
+        Tabla tablaFiltrada = miTabla.filtrar("Edad > 23 and EsEstudiante = true");
+        tablaFiltrada.visualizar(5, 5, 30, 0);
 
         } catch (TipoIncompatible | EtiquetaInvalida e) {
             System.out.println("Error: " + e.getMessage());
         }
+
     }
+
+
 }
