@@ -6,7 +6,6 @@ import java.util.HashMap;
 import Excepciones.EtiquetaInvalida;
 import Excepciones.TipoIncompatible;
 import java.util.Random;
-import java.util.Collections;
 import java.util.Comparator;
 
 public class Tabla {

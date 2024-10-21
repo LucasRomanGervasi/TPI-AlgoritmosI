@@ -32,6 +32,15 @@ public class Main {
             tabla.getColumna("Nombre").agregarCelda("Juan");
             tabla.getColumna("Edad").agregarCelda(28);
             tabla.getColumna("Altura").agregarCelda(1.75);
+            // Agregar filas con IDs
+            tabla.agregarFila(0); //etiqueta de fila y columna pueden ser enteros y strings
+            tabla.agregarFila(1);
+            tabla.agregarFila(2);
+
+            // Asignar valores a las celdas
+            tabla.setValorCelda(0, "Nombre", "Juan");
+            tabla.setValorCelda(0, "Edad", 25);
+            tabla.setValorCelda(0, "Altura", 1.76);
 
             // Visualizar la tabla con filas agregadas
             System.out.println("Tabla después de agregar valores:");
@@ -81,6 +90,44 @@ public class Main {
 
             //PRUEBA ULTIMOS METODOS
 
+            System.out.println("\nTabla después de eliminar la fila con ID 1 (Ana):");
+            tabla.visualizar(5, 2, 10); // Visualizar con 2 columnas y 2 filas
+
+            // Modificar un valor y visualizar la tabla modificada
+            tabla.setValorCelda(0, "Edad", 26); // Cambiar la edad de Juan
+            System.out.println("\nTabla después de modificar la edad de Juan:");
+            tabla.visualizar(5, 2, 10); // Visualizar con cambios
+
+
+            System.out.println("Muestrear el 50% de las filas:");
+            tabla.muestrear(50, 10);  // 50% de las filas, con ancho máximo de celda 10
+
+        } catch (EtiquetaInvalida | TipoIncompatible e) {
+            System.out.println(e.getMessage()); //no hace falta el try, catch. que corte la ejecucion
+        }
+
+        // Seleccionar filas y columnas específicas
+        System.out.println("Selección parcial:");
+        List<String> columnas = Arrays.asList("Nombre", "Edad"); // Usa Arrays.asList en lugar de List.of
+        List<Integer> filas = Arrays.asList(0, 1);  // Solo filas 0 y 2
+        try {
+            tabla.seleccionar(columnas, filas, 10);  // Max ancho de celda: 10
+        } catch (EtiquetaInvalida e) {
+            System.out.println(e.getMessage());
+        }
+
+        // Mostrar las primeras 2 filas
+        System.out.println("\nHead(1):");
+        tabla.head(1, 10);
+
+        // Mostrar las últimas 2 filas
+        System.out.println("\nTail(1):");
+        tabla.tail(1, 10);
+
+
+        //PRUEBA DE CONCATENACION
+        System.out.println("\nPrueba de concatenación:");
+        try {
             Tabla tabla1 = new Tabla();
             tabla1.agregarColumna("Nombre", String.class);
             tabla1.agregarColumna("Edad", Integer.class);
@@ -202,6 +249,11 @@ public class Main {
         // Filtrar filas donde Edad > 23 y EsEstudiante es true
         Tabla tablaFiltrada = miTabla.filtrar("Edad > 23 and EsEstudiante = true");
         tablaFiltrada.visualizar(5, 5, 30, 0);
+
+        int fila = miTabla.getCantidadFilas();
+        System.out.println("Cantidad de filas: " + fila);
+
+        miTabla.visualizar(5, 5, 10, 0);
 
         } catch (TipoIncompatible | EtiquetaInvalida e) {
             System.out.println("Error: " + e.getMessage());
