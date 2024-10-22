@@ -18,15 +18,15 @@ public class Main {
             // Visualizar la tabla inicial
             System.out.println("Tabla inicial con columnas y filas:");
             tabla.visualizar(5, 5, 10, 0);
-            System.out.println();
+
 
             // Modificar un valor específico (reemplazar el nombre "Lucas" con "Lucía")
-            tabla.getColumna("Nombre").setValor(0, "Lucía");
+            tabla.setValorCelda(0, "Nombre", "Lucia");
 
             // Visualizar la tabla después de la modificación
             System.out.println("Tabla después de modificar el valor de la primera fila:");
             tabla.visualizar(5, 5, 10, 0);
-            System.out.println();
+
 
             // Eliminar una columna (por ejemplo, "Altura")
             tabla.eliminarColumna("Altura");
@@ -34,7 +34,7 @@ public class Main {
             // Visualizar la tabla después de eliminar la columna "Altura"
             System.out.println("Tabla después de eliminar la columna 'Altura':");
             tabla.visualizar(5, 5, 10, 0);
-            System.out.println();
+
 
             // Eliminar una fila (por ejemplo, la segunda fila con índice 1)
             tabla.eliminarFila(1);
@@ -42,19 +42,16 @@ public class Main {
             // Visualizar la tabla después de eliminar la fila
             System.out.println("Tabla después de eliminar la segunda fila:");
             tabla.visualizar(5, 5, 10, 0);
-            System.out.println();
+
 
             // Mostrar solo las primeras 2 filas (head)
             System.out.println("Visualización de la primera fila:");
             tabla.head(1);
-            System.out.println();
+
 
             // Mostrar solo las últimas 2 filas (tail)
             System.out.println("Visualización de la última fila:");
             tabla.tail(1);
-            System.out.println();
-
-
 
             // Concatenación de tablas
             Object[][] datosTabla1 = {
