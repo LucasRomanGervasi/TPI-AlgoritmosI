@@ -34,6 +34,9 @@ public class Tabla {
             crearDesdeSecuenciaLineal(secuenciaLineal);
         } catch (TipoIncompatible | EtiquetaInvalida e) {
             System.err.println("Error al crear la tabla desde la secuencia lineal: " + e.getMessage());
+            // Limpia cualquier columna y fila parcial cargada para evitar una tabla incompleta
+            columnas.clear();
+            indicesColumnas.clear();
         }
     }
 
@@ -53,21 +56,17 @@ public class Tabla {
             }
             
             String etiqueta = matriz[0][j].toString();
-            Class<?> tipoDato = null;
-            
+            Class<?> tipoDato = String.class; // Asignar String por defecto
+    
             // Determinar el tipo de dato de la columna basándonos en los datos (ignorar valores nulos)
             for (int i = 1; i < matriz.length; i++) {
                 if (matriz[i].length > j) { // Asegurarse de que no exceda el límite de columnas
                     Object valor = matriz[i][j];
                     if (valor != null) {
-                        tipoDato = determinarTipoDato(valor);
-                        if (tipoDato != null) break;
+                        tipoDato = determinarTipoDato(valor); // Determinar el tipo si el valor no es nulo
+                        break; // Solo necesitamos un valor no nulo para determinar el tipo
                     }
                 }
-            }
-            
-            if (tipoDato == null) {
-                tipoDato = String.class;  // Si no se pudo determinar, asignar String por defecto
             }
             
             agregarColumna(etiqueta, tipoDato);
@@ -80,10 +79,45 @@ public class Tabla {
             for (int j = 0; j < matriz[i].length; j++) {
                 if (j < columnas.size()) {
                     Object valor = matriz[i][j];
-                    setValorCelda(i - 1, columnas.get(j).getEtiquetaColumna(), valor);
+    
+                    // Permitir valores especiales y nulos
+                    if (valor == null || valor.equals("NA") || valor.equals("NAN")) {
+                        setValorCelda(i - 1, columnas.get(j).getEtiquetaColumna(), null);
+                    } else {
+                        // Intentar asignar el valor a la celda
+                        Class<?> tipoColumna = columnas.get(j).getTipoDato();
+                        
+                        // Verificar que el valor es compatible con el tipo de la columna
+                        if (!tipoColumna.isInstance(valor)) {
+                            // Si el tipo no coincide, intenta convertirlo si es posible
+                            try {
+                                valor = convertirValor(valor, tipoColumna);
+                            } catch (TipoIncompatible e) {
+                                System.err.println("Error al convertir el valor en la columna " + columnas.get(j).getEtiquetaColumna() + ": " + e.getMessage());
+                                continue; // Saltar este valor incompatible
+                            }
+                        }
+                        
+                        // Asignar el valor final
+                        setValorCelda(i - 1, columnas.get(j).getEtiquetaColumna(), valor);
+                    }
                 }
             }
         }
+    }
+    
+    // Método para convertir valores al tipo de dato correspondiente
+    private Object convertirValor(Object valor, Class<?> tipoColumna) throws TipoIncompatible {
+        if (tipoColumna == Integer.class) {
+            return Integer.parseInt(valor.toString());
+        } else if (tipoColumna == Double.class) {
+            return Double.parseDouble(valor.toString());
+        } else if (tipoColumna == Boolean.class) {
+            return Boolean.parseBoolean(valor.toString());
+        } else if (tipoColumna == String.class) {
+            return valor.toString();
+        }
+        throw new TipoIncompatible("No se puede convertir el valor a " + tipoColumna.getName());
     }
 
     private Class<?> determinarTipoDato(Object valor) throws TipoIncompatible {
@@ -95,12 +129,14 @@ public class Tabla {
             return Boolean.class;
         } else if (valor instanceof String) {
             return String.class;
+        }
+        // Manejar "NA" y "NAN"
+        else if (valor.equals("NA") || valor.equals("NAN")) {
+            return String.class; // Asignar String para estos casos
         } else {
             throw new TipoIncompatible("Tipo de dato no soportado: " + valor.getClass().getName());
         }
     }
-    
-    
     
     // Método para crear tabla desde archivo CSV
     private void crearDesdeArchivoCSV(String rutaArchivoCSV) throws IOException, TipoIncompatible, EtiquetaInvalida {
@@ -124,46 +160,121 @@ public class Tabla {
             throw new IOException("El archivo CSV está vacío.");
         }
     
-        // Crear una matriz de objetos a partir de los datos
-        Object[][] matriz = new Object[datos.size()][datos.get(0).size()];
-        for (int i = 0; i < datos.size(); i++) {
-            for (int j = 0; j < datos.get(i).size(); j++) {
-                matriz[i][j] = datos.get(i).get(j);
+        // Asumir la primera fila como las etiquetas de las columnas
+        List<String> etiquetas = datos.get(0);
+        int numColumnas = etiquetas.size();
+    
+        // Asignar tipo de dato según el primer valor no nulo de cada columna
+        for (int col = 0; col < numColumnas; col++) {
+            String etiqueta = etiquetas.get(col);
+            Class<?> tipoDato = null;
+    
+            // Determinar el tipo de dato usando el primer valor no nulo de la columna
+            for (int fila = 1; fila < datos.size(); fila++) {
+                String valor = datos.get(fila).get(col);
+                if (valor != null && !valor.isEmpty()) {
+                    tipoDato = inferirTipoDato(valor);
+                    break;
+                }
+            }
+    
+            if (tipoDato == null) {
+                throw new TipoIncompatible("No se pudo inferir el tipo de dato de la columna: " + etiqueta);
+            }
+    
+            agregarColumna(etiqueta, tipoDato);
+    
+            // Validar los tipos de datos en la columna
+            for (int fila = 1; fila < datos.size(); fila++) {
+                String valor = datos.get(fila).get(col);
+                if (valor != null && !valor.isEmpty()) {
+                    Class<?> tipoValor = inferirTipoDato(valor);
+                    if (!tipoDato.equals(tipoValor)) {
+                        throw new TipoIncompatible("Tipo de dato inconsistente en la columna " + etiqueta +
+                                ". Se esperaba " + tipoDato.getSimpleName() + " pero se encontró " + tipoValor.getSimpleName() + " en la fila " + (fila + 1));
+                    }
+                }
             }
         }
     
-        crearDesdeMatriz(matriz);  // Crear la tabla a partir de la matriz generada
+        // Agregar filas a la tabla
+        for (int i = 1; i < datos.size(); i++) {
+            agregarFila();
+            for (int j = 0; j < numColumnas; j++) {
+                String valor = datos.get(i).get(j);
+                Object valorConvertido = convertirValor(valor, columnas.get(j).getTipoDato());
+                setValorCelda(i - 1, etiquetas.get(j), valorConvertido);
+            }
+        }
+    }
+    
+    // Método auxiliar para inferir el tipo de dato de un valor en formato String
+    private Class<?> inferirTipoDato(String valor) {
+        try {
+            Integer.parseInt(valor);
+            return Integer.class;
+        } catch (NumberFormatException e1) {
+            if (valor.equalsIgnoreCase("true") || valor.equalsIgnoreCase("false")) {
+                return Boolean.class;
+            } else {
+                return String.class;
+            }
+        }
+    }
+    
+    // Método auxiliar para convertir un String al tipo de dato correspondiente
+    private Object convertirValor(String valor, Class<?> tipo) throws TipoIncompatible {
+        if (valor == null || valor.isEmpty()) {
+            return null; // o algún valor por defecto si lo necesitas
+        }
+        if (tipo == Integer.class) {
+            return Integer.parseInt(valor);
+        } else if (tipo == Boolean.class) {
+            return Boolean.parseBoolean(valor);
+        } else if (tipo == String.class) {
+            return valor;
+        } else {
+            throw new TipoIncompatible("Tipo de dato no compatible para la conversión: " + tipo.getSimpleName());
+        }
     }
     
 
     // Método para crear tabla desde secuencia lineal
-    // Método para crear la tabla desde secuencia lineal
     private void crearDesdeSecuenciaLineal(List<Object> secuenciaLineal) throws TipoIncompatible, EtiquetaInvalida {
         if (secuenciaLineal == null || secuenciaLineal.isEmpty()) {
             throw new IllegalArgumentException("La secuencia lineal no puede estar vacía.");
         }
-
+    
         columnas = new ArrayList<>();
         indicesColumnas = new HashMap<>();
-
-        // Supongamos que el primer objeto define el tipo de columna
-        Object primerElemento = secuenciaLineal.get(0);
-        if (primerElemento instanceof List) {
-            List<?> primeraFila = (List<?>) primerElemento;
-            agregarColumna("Datos", primeraFila.get(0).getClass()); // Tipo de la primera celda de la primera fila
-
-            // Agregar filas a la tabla
-            for (Object filaObj : secuenciaLineal) {
-                if (filaObj instanceof List) {
-                    List<?> fila = (List<?>) filaObj;
-                    agregarFila();
-                    for (int i = 0; i < fila.size(); i++) {
-                        setValorCelda(getCantidadFilas() - 1, "Datos", fila.get(i)); // Agregar valor a la fila correspondiente
+    
+        // Determinar el tipo de cada columna con base en la primera fila
+        List<?> primeraFila = (List<?>) secuenciaLineal.get(0);
+        for (int i = 0; i < primeraFila.size(); i++) {
+            agregarColumna("Columna" + (i + 1), primeraFila.get(i).getClass());
+        }
+    
+        // Agregar las filas verificando tipos
+        for (Object filaObj : secuenciaLineal) {
+            if (filaObj instanceof List) {
+                List<?> fila = (List<?>) filaObj;
+                agregarFila();
+    
+                for (int i = 0; i < fila.size(); i++) {
+                    String etiquetaColumna = "Columna" + (i + 1);
+                    Object valor = fila.get(i);
+                    Class<?> tipoEsperado = columnas.get(i).getTipoDato();
+    
+                    // Verificar que el tipo del valor coincida con el tipo esperado de la columna
+                    if (valor != null && !tipoEsperado.isInstance(valor)) {
+                        throw new TipoIncompatible(
+                            "El valor en la columna " + etiquetaColumna + " no es compatible. Se esperaba: "
+                            + tipoEsperado.getSimpleName() + ", pero se encontró: " + valor.getClass().getSimpleName()
+                        );
                     }
+                    setValorCelda(getCantidadFilas() - 1, etiquetaColumna, valor);
                 }
             }
-        } else {
-            throw new TipoIncompatible("La secuencia lineal debe contener listas de objetos.");
         }
     }
 
@@ -269,34 +380,27 @@ public class Tabla {
     }
 
     public void setValorCelda(int fila, String etiquetaColumna, Object valor) throws TipoIncompatible, EtiquetaInvalida {
-        // Verifica si la columna existe
         Columna<?> columna = getColumna(etiquetaColumna);
-        
-        // Si el valor es nulo, lo permite (o maneja según la política de nulos)
+    
         if (valor == null) {
             columna.setValor(fila, null);
             return;
         }
-        
-        // Verifica si el tipo del valor es compatible con el tipo de la columna
+    
         Class<?> tipoEsperado = columna.getTipoDato();
-        
         if (!tipoEsperado.isInstance(valor)) {
-            // Si el valor no es del tipo esperado, intenta convertirlo
-            Object valorConvertido = convertValue(valor, tipoEsperado);
-            
-            // Valida nuevamente después de la conversión
-            if (!tipoEsperado.isInstance(valorConvertido)) {
-                throw new TipoIncompatible("El tipo de dato no es compatible con el tipo de la columna " + etiquetaColumna);
+            if (tipoEsperado == String.class && valor instanceof String) {
+                columna.setValor(fila, valor);
+            } else {
+                Object valorConvertido = convertValue(valor, tipoEsperado);
+                columna.setValor(fila, valorConvertido);
             }
-            
-            // Establece el valor convertido
-            columna.setValor(fila, valorConvertido);
         } else {
-            // Si el valor ya es del tipo correcto, lo establece directamente
             columna.setValor(fila, valor);
         }
     }
+    
+    
 
     public <T> void agregarColumna(String etiqueta, Class<T> tipoDato) throws TipoIncompatible, EtiquetaInvalida {
         if (!(tipoDato == Integer.class || tipoDato == Double.class || tipoDato == Boolean.class || tipoDato == String.class || tipoDato == null)) {
@@ -404,9 +508,15 @@ public class Tabla {
                     valor.equals("NAN") || 
                     valor.equals("null")) {
     
-                    // Intentar establecer el valor como cadena vacía
+                    // Intentar establecer el valor según el tipo de la columna
                     try {
-                        columna.setValor(i, ""); // Establece el valor como cadena vacía
+                        if (columna.getTipoDato() == String.class) {
+                            columna.setValor(i, ""); // Establece el valor como cadena vacía
+                        } else if (columna.getTipoDato() == Integer.class) {
+                            columna.setValor(i, 0); // Establece el valor como 0
+                        } else if (columna.getTipoDato() == Boolean.class) {
+                            columna.setValor(i, false); // Establece el valor como false
+                        }
                     } catch (TipoIncompatible e) {
                         // Manejo de la excepción en caso de tipo incompatible
                         System.err.println("No se pudo establecer el valor vacío en la columna " + columna.getEtiquetaColumna() + ": " + e.getMessage());
@@ -415,6 +525,23 @@ public class Tabla {
             }
         }
     }
+    
+    
+    
+    // Método auxiliar para obtener el valor de reemplazo adecuado según el tipo de la columna
+    private Object obtenerValorReemplazo(Class<?> tipoDato) {
+        if (tipoDato == String.class) {
+            return ""; // Cadena vacía para String
+        } else if (tipoDato == Integer.class) {
+            return 0; // 0 para Integer
+        } else if (tipoDato == Boolean.class) {
+            return false; // false para Boolean
+        } else if (tipoDato == Double.class) {
+            return 0.0; // 0.0 para Double
+        }
+        return null; // Tipo no soportado
+    }
+    
 
     public void head(int n) {
         visualizar(n, getCantidadColumnas(), 10, 0);
@@ -705,18 +832,23 @@ public class Tabla {
     
     // Método de conversión de tipos
     private Object convertValue(Object value, Class<?> targetType) throws TipoIncompatible {
-        if (value == null) return null; // Manejar valores nulos
-        //System.out.println("Convirtiendo valor: " + value + " de tipo " + value.getClass().getSimpleName() + " a tipo " + targetType.getSimpleName());
-        
+        if (value == null) return null;
+    
+        // Si el valor ya es del tipo esperado, devuélvelo sin conversión
+        if (targetType.isInstance(value)) {
+            return value;
+        }
+    
+        // Conversiones específicas para Integer, Double, Boolean y String
         try {
-            if (targetType == Integer.class) {
-                return Integer.parseInt(value.toString());
-            } else if (targetType == Double.class) {
-                return Double.parseDouble(value.toString());
-            } else if (targetType == Boolean.class) {
-                return Boolean.parseBoolean(value.toString());
+            if (targetType == Integer.class && value instanceof String) {
+                return Integer.parseInt((String) value);
+            } else if (targetType == Double.class && value instanceof String) {
+                return Double.parseDouble((String) value);
+            } else if (targetType == Boolean.class && value instanceof String) {
+                return Boolean.parseBoolean((String) value);
             } else if (targetType == String.class) {
-                return value.toString(); // Asegurarte de que sea un String
+                return value.toString();
             } else {
                 throw new TipoIncompatible("Tipo de dato no soportado: " + targetType.getName());
             }
@@ -724,7 +856,6 @@ public class Tabla {
             throw new TipoIncompatible("Error al convertir el valor: " + value + " a tipo: " + targetType.getSimpleName());
         }
     }
-    
     
     
 
