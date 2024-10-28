@@ -39,7 +39,6 @@ public class Tabla {
             indicesColumnas.clear();
         }
     }
-
     private void crearDesdeMatriz(Object[][] matriz) throws TipoIncompatible, EtiquetaInvalida {
         columnas = new ArrayList<>();
         indicesColumnas = new HashMap<>();
@@ -57,53 +56,62 @@ public class Tabla {
             
             String etiqueta = matriz[0][j].toString();
             Class<?> tipoDato = String.class; // Asignar String por defecto
-    
-            // Determinar el tipo de dato de la columna basándonos en los datos (ignorar valores nulos)
+            
+            // Determinar el tipo de dato de la columna basándonos en los datos (ignorar valores nulos o NA/NAN)
             for (int i = 1; i < matriz.length; i++) {
-                if (matriz[i].length > j) { // Asegurarse de que no exceda el límite de columnas
+                if (matriz[i].length > j) {
                     Object valor = matriz[i][j];
-                    if (valor != null) {
-                        tipoDato = determinarTipoDato(valor); // Determinar el tipo si el valor no es nulo
-                        break; // Solo necesitamos un valor no nulo para determinar el tipo
+                    if (valor != null && !valor.equals("NA") && !valor.equals("NAN")) {
+                        tipoDato = determinarTipoDato(valor); // Determinar el tipo si el valor es válido
+                        break;
                     }
                 }
             }
             
             agregarColumna(etiqueta, tipoDato);
-            indicesColumnas.put(etiqueta, columnas.size() - 1);  // Guardar la posición de la columna
+            indicesColumnas.put(etiqueta, columnas.size() - 1);
         }
         
         // Agregar filas a la tabla
-        for (int i = 1; i < matriz.length; i++) {  // Comienza desde 1 para agregar las filas
+        for (int i = 1; i < matriz.length; i++) {
             agregarFila();
             for (int j = 0; j < matriz[i].length; j++) {
                 if (j < columnas.size()) {
                     Object valor = matriz[i][j];
-    
-                    // Permitir valores especiales y nulos
+                    
                     if (valor == null || valor.equals("NA") || valor.equals("NAN")) {
-                        setValorCelda(i - 1, columnas.get(j).getEtiquetaColumna(), null);
-                    } else {
-                        // Intentar asignar el valor a la celda
+                        // Asigna un valor predeterminado según el tipo de la columna
                         Class<?> tipoColumna = columnas.get(j).getTipoDato();
-                        
-                        // Verificar que el valor es compatible con el tipo de la columna
+                        valor = obtenerValorPredeterminado(tipoColumna);
+                    } else {
+                        // Verificar y convertir el valor si no coincide con el tipo de la columna
+                        Class<?> tipoColumna = columnas.get(j).getTipoDato();
                         if (!tipoColumna.isInstance(valor)) {
-                            // Si el tipo no coincide, intenta convertirlo si es posible
                             try {
                                 valor = convertirValor(valor, tipoColumna);
                             } catch (TipoIncompatible e) {
                                 System.err.println("Error al convertir el valor en la columna " + columnas.get(j).getEtiquetaColumna() + ": " + e.getMessage());
-                                continue; // Saltar este valor incompatible
+                                continue;
                             }
                         }
-                        
-                        // Asignar el valor final
-                        setValorCelda(i - 1, columnas.get(j).getEtiquetaColumna(), valor);
                     }
+                    
+                    setValorCelda(i - 1, columnas.get(j).getEtiquetaColumna(), valor);
                 }
             }
         }
+    }
+
+    // Método auxiliar para obtener un valor predeterminado según el tipo de la columna
+    private Object obtenerValorPredeterminado(Class<?> tipoColumna) {
+        if (tipoColumna == Integer.class) {
+            return 0;
+        } else if (tipoColumna == Boolean.class) {
+            return false;
+        } else if (tipoColumna == String.class) {
+            return "";
+        }
+        return null;
     }
     
     // Método para convertir valores al tipo de dato correspondiente
