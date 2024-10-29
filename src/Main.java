@@ -1,10 +1,9 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import ComponentesTabla.Tabla;
 import Excepciones.EtiquetaInvalida;
 import Excepciones.TipoIncompatible;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws TipoIncompatible, EtiquetaInvalida {
@@ -215,9 +214,9 @@ public class Main {
             Object[][] datosNA = {
                 {"Nombre", "Edad", "Activo"}, // Nombres de columnas
                 {"Lucas", 25, true},
-                {"NA", null, "NAN"},
+                {false, "NAN", 0},
                 {"Ana", 30, false},
-                {null, 40, null}
+                {null, 40, ""}
             };
             
             // Crear la tabla
@@ -234,7 +233,8 @@ public class Main {
             System.out.println("\nTabla después de eliminar NAs:");
             tablaNA.visualizar(5, 5, 10, 0);
             
-
+            Class N = tablaNA.getTipoDatoColumna("Nombre");
+            System.out.println(N);
     }
 }
 
