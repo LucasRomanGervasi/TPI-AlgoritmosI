@@ -79,10 +79,16 @@ public class Tabla {
                 if (j < columnas.size()) {
                     Object valor = matriz[i][j];
                     
-                    if (valor == null || valor.equals("NA") || valor.equals("NAN")) {
+                    if (valor == null || valor.equals(false) || valor.equals("NA") || valor.equals("NAN")) {
                         // Asigna un valor predeterminado según el tipo de la columna
                         Class<?> tipoColumna = columnas.get(j).getTipoDato();
-                        valor = obtenerValorPredeterminado(tipoColumna);
+                        
+                        // Si la columna es de tipo String, asigna una cadena vacía en lugar de "false"
+                        if (tipoColumna == String.class && valor instanceof Boolean && !((Boolean) valor)) {
+                            valor = ""; // Asignar cadena vacía para false en columna String
+                        } else {
+                            valor = obtenerValorPredeterminado(tipoColumna);
+                        }
                     } else {
                         // Verificar y convertir el valor si no coincide con el tipo de la columna
                         Class<?> tipoColumna = columnas.get(j).getTipoDato();
@@ -95,7 +101,6 @@ public class Tabla {
                             }
                         }
                     }
-                    
                     setValorCelda(i - 1, columnas.get(j).getEtiquetaColumna(), valor);
                 }
             }
