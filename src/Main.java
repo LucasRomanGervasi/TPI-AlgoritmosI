@@ -1,4 +1,5 @@
 import ComponentesTabla.Tabla;
+import ComponentesTabla.Tabla.Operacion;
 import Excepciones.EtiquetaInvalida;
 import Excepciones.TipoIncompatible;
 import java.util.ArrayList;
@@ -214,7 +215,7 @@ public class Main {
 
             System.out.println("Tabla para probar la eliminacion de Na");
             Object[][] datosNA = {
-                {"Nombre", "Edad", "Activo"}, // Nombres de columnas
+                {"Nombre", "Edad", 1}, // Nombres de columnas
                 {"Lucas", 20, true},
                 {"NA", null, false},
                 {"Ana", 30, false},
@@ -237,6 +238,31 @@ public class Main {
             
             Class N = tablaNA.getTipoDatoColumna("Edad");
             System.out.println(N);
+
+            /* List<Object> etiquetas1 = tablaNA.getEtiquetasFilas();
+            System.out.println(etiquetas1); */
+
+            System.out.println(System.lineSeparator());
+            System.out.println(System.lineSeparator());
+
+            System.out.println("Pruebas de agrupar");
+            Object[][] datosVentas = {
+                {"Región", "Producto", "Ventas"}, // Etiquetas de columnas
+                {"Norte", "A", 100},
+                {"Norte", "B", 200},
+                {"Sur", "A", 150},
+                {"Sur", "B", 250},
+                {"Este", "A", 300},
+                {"Este", "B", 400}};
+
+            Tabla tablaVentas = new Tabla(datosVentas);
+            List<String> columnasAgrupamiento = Arrays.asList("Producto");
+            Operacion operacion = Operacion.SUMA;
+
+            // 4. Llamar al método agregarPor para agrupar y calcular la suma de ventas por región
+            Tabla tablaAgrupada = tablaVentas.agregarPor(columnasAgrupamiento, operacion);
+            tablaAgrupada.visualizar(5, 5, 10, 0);
+
     }
 }
 
