@@ -215,7 +215,7 @@ public class Main {
             Object[][] datosNA = {
                 {"Nombre", "Edad", "Activo"}, // Nombres de columnas
                 {"Lucas", 25, true},
-                {"NA", null, "NAN"},
+                {"NA", null, false},
                 {"Ana", 30, false},
                 {null, 40, null}
             };
