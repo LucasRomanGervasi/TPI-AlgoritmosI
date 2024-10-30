@@ -3,6 +3,7 @@ import Excepciones.EtiquetaInvalida;
 import Excepciones.TipoIncompatible;
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Tabla {
     private List<Columna<?>> columnas;
@@ -290,10 +291,18 @@ public class Tabla {
         return columnas.isEmpty() ? 0 : columnas.get(0).getCeldas().size();
     }
 
-    public List<String> getEtiquetasColumnas() {
-        List<String> etiquetas = new ArrayList<>();
+    public List<Object> getEtiquetasColumnas() {
+        List<Object> etiquetas = new ArrayList<>();
         for (Columna<?> columna : columnas) {
             etiquetas.add(columna.getEtiquetaColumna());
+        }
+        return etiquetas;
+    }
+
+    public List<Object> getEtiquetasFilas() {
+        List<Object> etiquetas = new ArrayList<>();
+        for (int i = 0; i < getCantidadFilas(); i++) {
+            etiquetas.add(i);
         }
         return etiquetas;
     }
@@ -932,25 +941,123 @@ public class Tabla {
         }
 
     }
+    public enum Operacion {
+        SUMA, MAXIMO, MINIMO, CUENTA, MEDIA, VARIANZA, DESVIO
+    }
 
-    
-    /* public void rellenarColumna(String etiqueta, Object valor) throws EtiquetaInvalida, TipoIncompatible {
-        if (!indicesColumnas.containsKey(etiqueta)) {
-            throw new EtiquetaInvalida("La etiqueta de la columna no existe.");
-        }
-        int columnaIndex = indicesColumnas.get(etiqueta);
-        Columna<?> columna = columnas.get(columnaIndex);
-    
-        // Verificar el tipo de dato y actualizar todas las celdas de la columna
-        Class<?> tipoDato = columna.getTipoDato();
-        if (!tipoDato.isInstance(valor)) {
-            throw new TipoIncompatible("El tipo de dato no coincide con el de la columna.");
+    public Tabla agregarPor(List<String> columnasAgrupamiento, Operacion operacion) throws TipoIncompatible, EtiquetaInvalida {
+        if (columnasAgrupamiento == null || columnasAgrupamiento.isEmpty()) {
+            throw new IllegalArgumentException("Las columnas de agrupamiento no pueden estar vacías.");
         }
     
+        // Mapa para almacenar los grupos de filas, donde la clave es la combinación de valores de agrupamiento
+        Map<String, List<List<Object>>> grupos = new HashMap<>();
+    
+        // Agrupar filas según las columnas indicadas
         for (int i = 0; i < getCantidadFilas(); i++) {
-            columna.setValor(i, valor);
+            List<Object> fila = getFila(i);  // Usamos List<Object> en lugar de Map<String, Object>
+            String claveGrupo = generarClaveGrupo(fila, columnasAgrupamiento);
+    
+            // Agregar la fila al grupo correspondiente
+            grupos.computeIfAbsent(claveGrupo, k -> new ArrayList<>()).add(fila);
         }
-    } */
+    
+        // Crear la estructura de la tabla de resultados
+        List<Object[]> datosResultado = new ArrayList<>();
+        List<String> columnasNumericas = getColumnasNumericas(columnasAgrupamiento);
+    
+        // Generar la fila de etiquetas de columnas
+        Object[] filaEtiquetas = new Object[columnasNumericas.size() + 1];
+        filaEtiquetas[0] = "Grupo";
+        for (int i = 0; i < columnasNumericas.size(); i++) {
+            filaEtiquetas[i + 1] = columnasNumericas.get(i);
+        }
+        datosResultado.add(filaEtiquetas);
+    
+        // Generar resultados para cada grupo
+        for (Map.Entry<String, List<List<Object>>> entradaGrupo : grupos.entrySet()) {
+            String claveGrupo = entradaGrupo.getKey();
+            List<List<Object>> filasGrupo = entradaGrupo.getValue();
+    
+            Object[] filaResultado = new Object[columnasNumericas.size() + 1];
+            filaResultado[0] = claveGrupo;
+    
+            for (int i = 0; i < columnasNumericas.size(); i++) {
+                String columna = columnasNumericas.get(i);
+                filaResultado[i + 1] = calcularOperacion(filasGrupo, columna, operacion);
+            }
+            datosResultado.add(filaResultado);
+        }
+    
+        // Convertir datosResultado a una matriz Object[][]
+        Object[][] matrizDatos = datosResultado.toArray(new Object[0][]);
+    
+        // Crear una nueva instancia de Tabla y llamar a crearDesdeMatriz
+        
+        Tabla nuevaTabla = new Tabla(matrizDatos);
+        return nuevaTabla;
+    }
+    
+    // Método para generar la clave de grupo como combinación de valores de las columnas de agrupamiento
+    private String generarClaveGrupo(List<Object> fila, List<String> columnasAgrupamiento) {
+        List<String> valores = new ArrayList<>();
+        for (String columna : columnasAgrupamiento) {
+            int indice = getIndiceColumna(columna);  // Método para obtener el índice de la columna
+            valores.add(fila.get(indice).toString());
+        }
+        return String.join(", ", valores);
+    }
+    
+    // Obtener columnas numéricas que no están en las de agrupamiento
+    private List<String> getColumnasNumericas(List<String> columnasAgrupamiento) {
+        return columnas.stream()
+            .filter(columna -> !columnasAgrupamiento.contains(columna.getEtiquetaColumna()) && 
+                                Number.class.isAssignableFrom(columna.getTipoDato()))
+            .map(Columna::getEtiquetaColumna)
+            .collect(Collectors.toList());
+    }
+    
+    // Calcular la operación de agregación sobre la columna de un grupo
+    private Object calcularOperacion(List<List<Object>> filasGrupo, String columna, Operacion operacion) throws TipoIncompatible {
+        int indiceColumna = getIndiceColumna(columna);  // Obtener índice de la columna
+        List<Double> valores = filasGrupo.stream()
+            .map(fila -> fila.get(indiceColumna))
+            .filter(Objects::nonNull)
+            .map(valor -> ((Number) valor).doubleValue())
+            .collect(Collectors.toList());
+    
+        switch (operacion) {
+            case SUMA:
+                return valores.stream().mapToDouble(Double::doubleValue).sum();
+            case MAXIMO:
+                return valores.stream().mapToDouble(Double::doubleValue).max().orElse(Double.NaN);
+            case MINIMO:
+                return valores.stream().mapToDouble(Double::doubleValue).min().orElse(Double.NaN);
+            case CUENTA:
+                return valores.size();
+            case MEDIA:
+                return valores.stream().mapToDouble(Double::doubleValue).average().orElse(Double.NaN);
+            case VARIANZA:
+                double media = valores.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+                return valores.stream().mapToDouble(v -> Math.pow(v - media, 2)).sum() / (valores.size() - 1);
+            case DESVIO:
+                double varianza = (double) calcularOperacion(filasGrupo, columna, Operacion.VARIANZA);
+                return Math.sqrt(varianza);
+            default:
+                throw new TipoIncompatible("Operación no soportada: " + operacion);
+        }
+    }
+    
+    // Método auxiliar para obtener el índice de una columna dado su nombre
+    private int getIndiceColumna(String nombreColumna) {
+        for (int i = 0; i < columnas.size(); i++) {
+            if (columnas.get(i).getEtiquetaColumna().equals(nombreColumna)) {
+                return i;
+            }
+        }
+        throw new IllegalArgumentException("Columna no encontrada: " + nombreColumna);
+    }
+    
     
 }
 
