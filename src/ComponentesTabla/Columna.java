@@ -81,7 +81,20 @@ public class Columna<T> {
             celdas.add(null);
         }
     }
-}
 
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Columna{etiqueta='").append(etiqueta).append("', datos=[");
+        for (Celda<T> celda : celdas) {
+            sb.append(celda.toString()).append(", "); // Asumiendo que `Celda` tiene un método `toString`.
+        }
+        // Eliminar la última coma y espacio
+        if (celdas.size() > 0) {
+            sb.setLength(sb.length() - 2);
+        }
+        sb.append("]}");
+        return sb.toString();
+    }
+}
 
 

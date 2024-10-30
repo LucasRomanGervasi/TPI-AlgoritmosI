@@ -325,12 +325,12 @@ public class Tabla {
         return fila;
     }
 
-    public Columna<?> getColumna(String etiqueta) throws EtiquetaInvalida {
-        if (!indicesColumnas.containsKey(etiqueta)) {
-            throw new EtiquetaInvalida("La etiqueta de la columna no existe.");
+        public Columna<?> getColumna(String etiqueta) throws EtiquetaInvalida {
+            if (!indicesColumnas.containsKey(etiqueta)) {
+                throw new EtiquetaInvalida("La etiqueta de la columna no existe.");
+            }
+            return columnas.get(indicesColumnas.get(etiqueta));
         }
-        return columnas.get(indicesColumnas.get(etiqueta));
-    }
 
     public Object getCelda(int idFila, String etiquetaColumna) throws EtiquetaInvalida {
         if (idFila < 0 || idFila >= getCantidadFilas()) {

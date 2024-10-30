@@ -1,4 +1,6 @@
+import ComponentesTabla.Columna;
 import ComponentesTabla.Tabla;
+import ComponentesTabla.Celda;
 import ComponentesTabla.Tabla.Operacion;
 import Excepciones.EtiquetaInvalida;
 import Excepciones.TipoIncompatible;

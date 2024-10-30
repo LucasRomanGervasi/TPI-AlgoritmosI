@@ -17,4 +17,9 @@ public class Celda<T> {
     public boolean esNA() {
         return valor == null;
     }
+
+    @Override
+    public String toString() {
+        return valor != null ? valor.toString() : "null";
+    }
 }
