@@ -1,10 +1,9 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import ComponentesTabla.Tabla;
 import Excepciones.EtiquetaInvalida;
 import Excepciones.TipoIncompatible;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws TipoIncompatible, EtiquetaInvalida {
@@ -25,8 +24,10 @@ public class Main {
             System.out.println(System.lineSeparator());
 
             System.out.println("Carga desde un archivo CSV:");
-            Tabla tablaCSV = new Tabla("C:\\Users\\lucas\\OneDrive\\Escritorio\\dato.csv");
+            Tabla tablaCSV = new Tabla("C:\\Users\\lucas\\OneDrive\\Escritorio\\dato (2).csv", false);
             tablaCSV.visualizar(5, 5, 15, 0);
+            Class n = tablaCSV.getTipoDatoColumna("Columna2");
+            System.out.println(n);
 
             System.out.println(System.lineSeparator());
             System.out.println(System.lineSeparator());
@@ -35,7 +36,7 @@ public class Main {
             List<Object> secuenciaLineal = new ArrayList<>();
 
             // Agregar filas a la secuencia
-            secuenciaLineal.add(Arrays.asList(10, 20, 30));      // Fila 1
+            secuenciaLineal.add(Arrays.asList(10, null, 30));      // Fila 1
             secuenciaLineal.add(Arrays.asList(40, 50, 60));      // Fila 2
             secuenciaLineal.add(Arrays.asList(70, 80, 90));      // Fila 3
             
@@ -214,7 +215,7 @@ public class Main {
             System.out.println("Tabla para probar la eliminacion de Na");
             Object[][] datosNA = {
                 {"Nombre", "Edad", "Activo"}, // Nombres de columnas
-                {"Lucas", 25, true},
+                {"Lucas", 20, true},
                 {"NA", null, false},
                 {"Ana", 30, false},
                 {null, 40, null}
@@ -222,7 +223,7 @@ public class Main {
             
             // Crear la tabla
             Tabla tablaNA = new Tabla(datosNA);
-            
+
             // Mostrar la tabla antes de eliminar los NA
             System.out.println("Tabla antes de eliminar NAs:");
             tablaNA.visualizar(5, 5, 10, 0);
@@ -234,7 +235,8 @@ public class Main {
             System.out.println("\nTabla después de eliminar NAs:");
             tablaNA.visualizar(5, 5, 10, 0);
             
-
+            Class N = tablaNA.getTipoDatoColumna("Edad");
+            System.out.println(N);
     }
 }
 

@@ -23,7 +23,7 @@ public class Columna<T> {
 
     // Método para verificar si el tipo es válido
     private boolean esTipoValido(Class<T> tipo) {
-        return tipo == String.class || Number.class.isAssignableFrom(tipo) || tipo == Boolean.class || tipo == null;
+        return tipo == String.class || tipo == Integer.class  || tipo == Boolean.class || tipo == null || tipo == Double.class;
     }
 
     public T getValor(int index) {
@@ -48,7 +48,7 @@ public class Columna<T> {
 
     // Establecer un valor en un índice específico de la columna
     public void setValor(int index, Object valor) throws TipoIncompatible {
-        if (!tipoDato.isInstance(valor)) {
+        if (valor != null && !tipoDato.isInstance(valor)) {
             throw new TipoIncompatible("El tipo de dato no es compatible con el tipo de la columna.");
         }
         Celda<T> nuevaCelda = new Celda<>((T) valor); // Crea una nueva instancia de Celda
