@@ -5,11 +5,13 @@ import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Tabla {
+import ComponentesTabla.Interfaces.*;
+
+public class Tabla implements Visualizacion {
     private List<Columna<?>> columnas;
     private Map<String, Integer> indicesColumnas;
 
-    // Constructor desde matriz
+
     public Tabla(Object[][] matriz) {
         try {
             crearDesdeMatriz(matriz);
@@ -197,9 +199,7 @@ public class Tabla {
         }
         return etiquetas;
     }
-    
-    
-    
+
     // Método auxiliar para inferir el tipo de dato de un valor en formato String
     private Class<?> inferirTipoDato(String valor) {
         try {
@@ -343,7 +343,8 @@ public class Tabla {
         return columnas.get(columnaIndex).getValor(idFila);
     }
 
-    public void visualizar(int maxFilas, int maxColumnas, int maxAnchoCelda, int filaInicio) {
+    @Override
+    public void mostrar(int maxFilas, int maxColumnas, int maxAnchoCelda, int filaInicio) {
         int totalFilas = getCantidadFilas();
         int totalColumnas = getCantidadColumnas();
         //System.out.println(totalFilas + " filas x " + totalColumnas + " columnas");
@@ -537,7 +538,7 @@ public class Tabla {
     
 
     public void head(int n) {
-        visualizar(n, getCantidadColumnas(), 10, 0);
+        mostrar(n, getCantidadColumnas(), 10, 0);
     }
 
     public void tail(int n) {
@@ -547,7 +548,7 @@ public class Tabla {
         
         System.out.println("Mostrando las últimas " + filasMostrar + " filas:");
         
-        visualizar(filasMostrar, getCantidadColumnas(), 10, filasDesde);
+        mostrar(filasMostrar, getCantidadColumnas(), 10, filasDesde);
     }
 
     public Tabla filtrar(String query) throws EtiquetaInvalida, TipoIncompatible {
@@ -893,6 +894,7 @@ public class Tabla {
         }
     } */
 
+    @Override
     public void muestrear(double porcentaje, int maxAnchoCelda) {
         if (porcentaje < 0 || porcentaje > 100) {
             throw new IllegalArgumentException("El porcentaje debe estar entre 0 y 100.");
@@ -1057,7 +1059,6 @@ public class Tabla {
         }
         throw new IllegalArgumentException("Columna no encontrada: " + nombreColumna);
     }
-    
     
 }
 
