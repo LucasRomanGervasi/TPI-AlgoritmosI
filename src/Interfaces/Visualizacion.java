@@ -1,4 +1,4 @@
-package ComponentesTabla.Interfaces;
+package Interfaces;
 
 public interface Visualizacion {
 
