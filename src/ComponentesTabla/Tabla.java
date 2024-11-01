@@ -1,11 +1,10 @@
 package ComponentesTabla;
 import Excepciones.EtiquetaInvalida;
 import Excepciones.TipoIncompatible;
+import Interfaces.*;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import ComponentesTabla.Interfaces.*;
 
 public class Tabla implements Visualizacion {
     private List<Columna<?>> columnas;

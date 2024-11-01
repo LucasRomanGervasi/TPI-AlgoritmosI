@@ -21,14 +21,14 @@ public class Main {
             };
             // Crear la tabla desde una matriz de objetos
             Tabla TablaMatriz = new Tabla(datos);
-            TablaMatriz.visualizar(5, 5, 15, 0);
+            TablaMatriz.mostrar(5, 5, 15, 0);
 
             System.out.println(System.lineSeparator());
             System.out.println(System.lineSeparator());
 
             System.out.println("Carga desde un archivo CSV:");
             Tabla tablaCSV = new Tabla("C:\\Users\\lucas\\OneDrive\\Escritorio\\dato (2).csv", false);
-            tablaCSV.visualizar(5, 5, 15, 0);
+            tablaCSV.mostrar(5, 5, 15, 0);
             Class n = tablaCSV.getTipoDatoColumna("Columna2");
             System.out.println(n);
 
@@ -45,7 +45,7 @@ public class Main {
             
             // Crear la tabla usando el constructor con secuencia lineal
             Tabla tablaSLineal = new Tabla(secuenciaLineal);
-            tablaSLineal.visualizar(5, 5, 15, 0);
+            tablaSLineal.mostrar(5, 5, 15, 0);
 
         
             System.out.println(System.lineSeparator());
@@ -65,7 +65,7 @@ public class Main {
 
             // Visualizar la tabla inicial
             System.out.println("Tabla inicial con columnas y filas:");
-            tabla.visualizar(5, 5, 10, 0);
+            tabla.mostrar(5, 5, 10, 0);
 
             System.out.println(System.lineSeparator());
             System.out.println(System.lineSeparator());
@@ -74,7 +74,7 @@ public class Main {
 
             // Visualizar la tabla después de la modificación
             System.out.println("Tabla después de modificar el valor de la primera fila:");
-            tabla.visualizar(5, 5, 10, 0);
+            tabla.mostrar(5, 5, 10, 0);
 
             System.out.println(System.lineSeparator());
             System.out.println(System.lineSeparator());
@@ -85,7 +85,7 @@ public class Main {
 
             // Visualizar la tabla después de eliminar la columna "Altura"
             System.out.println("Tabla después de eliminar la columna 'Altura':");
-            tabla.visualizar(5, 5, 10, 0);
+            tabla.mostrar(5, 5, 10, 0);
 
             System.out.println(System.lineSeparator());
             System.out.println(System.lineSeparator());
@@ -96,7 +96,7 @@ public class Main {
 
             // Visualizar la tabla después de eliminar la fila
             System.out.println("Tabla después de eliminar la segunda fila:");
-            tabla.visualizar(5, 5, 10, 0);
+            tabla.mostrar(5, 5, 10, 0);
 
             System.out.println(System.lineSeparator());
             System.out.println(System.lineSeparator());
@@ -135,19 +135,19 @@ public class Main {
             Tabla tabla2 = new Tabla(datosTabla2);
 
             System.out.println("Tabla 1:");
-            tabla1.visualizar(3, 3, 10, 0);
+            tabla1.mostrar(3, 3, 10, 0);
 
             System.out.println(System.lineSeparator());
 
             System.out.println("Tabla 2:");
-            tabla2.visualizar(3, 3, 10, 0);
+            tabla2.mostrar(3, 3, 10, 0);
 
             System.out.println(System.lineSeparator());
 
             // Concatenar las tablas
             Tabla tablaConcatenada = tabla1.concatenar(tabla2); 
             System.out.println("Tabla Concatenada:");
-            tablaConcatenada.visualizar(10, 3, 10, 0);
+            tablaConcatenada.mostrar(10, 3, 10, 0);
 
             System.out.println(System.lineSeparator());
             System.out.println(System.lineSeparator());
@@ -155,7 +155,7 @@ public class Main {
             // Prueba copia profunda
             System.out.println("Tabla copia profunda:");
             Tabla tablaCopia = tabla1.hacerCopiaProfunda(tabla1);
-            tablaCopia.visualizar(3, 3, 10, 0);
+            tablaCopia.mostrar(3, 3, 10, 0);
 
             System.out.println(System.lineSeparator());
             System.out.println(System.lineSeparator());
@@ -174,14 +174,14 @@ public class Main {
 
             // Filtrar filas donde Edad > 23 y EsEstudiante es true
             Tabla tablaFiltrada = miTabla.filtrar("Edad > 23 and EsEstudiante = true");
-            tablaFiltrada.visualizar(5, 5, 30, 0);
+            tablaFiltrada.mostrar(5, 5, 30, 0);
 
             System.out.println(System.lineSeparator());
             System.out.println(System.lineSeparator());
 
             int fila = miTabla.getCantidadFilas();
             System.out.println("Cantidad de filas: " + fila);
-            miTabla.visualizar(5, 5, 15, 0);
+            miTabla.mostrar(5, 5, 15, 0);
 
             System.out.println(System.lineSeparator());
             System.out.println(System.lineSeparator());
@@ -204,7 +204,7 @@ public class Main {
             Tabla tabla3 = tablaOrdenar.ordenar(tablaOrdenar, etiquetas, true); // true para ascendente
 
             // Visualizar la tabla ordenada (puedes cambiar la implementación de visualizar según lo que necesites)
-            tabla3.visualizar(5, 5, 10, 0);
+            tabla3.mostrar(5, 5, 10, 0);
 
             System.out.println(System.lineSeparator());
             System.out.println(System.lineSeparator());
@@ -229,14 +229,14 @@ public class Main {
 
             // Mostrar la tabla antes de eliminar los NA
             System.out.println("Tabla antes de eliminar NAs:");
-            tablaNA.visualizar(5, 5, 10, 0);
+            tablaNA.mostrar(5, 5, 10, 0);
             
             // Llamar al método para eliminar los NAs
             tablaNA.eliminarTodosNAs();
             
             // Mostrar la tabla después de eliminar los NA
             System.out.println("\nTabla después de eliminar NAs:");
-            tablaNA.visualizar(5, 5, 10, 0);
+            tablaNA.mostrar(5, 5, 10, 0);
             
             Class N = tablaNA.getTipoDatoColumna("Edad");
             System.out.println(N);
@@ -263,7 +263,7 @@ public class Main {
 
             // 4. Llamar al método agregarPor para agrupar y calcular la suma de ventas por región
             Tabla tablaAgrupada = tablaVentas.agregarPor(columnasAgrupamiento, operacion);
-            tablaAgrupada.visualizar(5, 5, 10, 0);
+            tablaAgrupada.mostrar(5, 5, 10, 0);
 
     }
 }
