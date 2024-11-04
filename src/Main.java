@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) throws TipoIncompatible, EtiquetaInvalida {
@@ -264,6 +265,9 @@ public class Main {
                 System.out.println("\nEjemplo de formato para la consulta:");
                 System.out.println("  Columna1 > 10 AND Columna2 < 20 OR NOT Columna3 = 'Valor'");
                 System.out.println("Formato: Columna condición (<, >, =, !=, <=, >=) valor (AND, OR, NOT) Columna condición valor");
+
+                System.out.println("Tabla a filtrar: ");
+                tabla.mostrar(5, 5, 10, 0);
             
                 // Solicitar la condición de filtrado al usuario
                 System.out.print("Ingrese la condición de filtrado: ");
@@ -274,12 +278,51 @@ public class Main {
                 System.out.println("Tabla después de aplicar el filtro:");
                 tablaFiltrada.mostrar(5, 5, 30, 0);
                 break;
-            case 12:
-                List<String> etiquetas = new ArrayList<>(Arrays.asList("Edad", "Altura"));
-                Tabla tablaOrdenada = tabla.ordenar(tabla, etiquetas, true);
-                tablaOrdenada.mostrar(5, 5, 10, 0);
-                break;
+                case 12:
+                    // Mostrar la tabla de ejemplo al usuario
+                    System.out.println("Tabla actual:");
+                    tabla.mostrar(5, 5, 10, 0);
+
+                    // Mostrar etiquetas disponibles
+                    System.out.println("Etiquetas de columnas disponibles para ordenar:");
+                    System.out.println(tabla.getEtiquetasColumnas());
+
+                    // Solicitar etiquetas para ordenar
+                    System.out.print("Ingrese las etiquetas de las columnas para ordenar (separadas por comas): ");
+                    String etiquetasInput = scanner.nextLine();
+                    List<String> etiquetas = Arrays.stream(etiquetasInput.split(",\\s*")) // Permite coma con o sin espacio
+                                                .collect(Collectors.toList());
+
+                    // Solicitar el orden
+                    boolean ordenAscendente;
+                    while (true) {
+                        System.out.print("¿Desea ordenar de manera ascendente (true) o descendente (false)? Ingrese true o false: ");
+                        String ordenInput = scanner.nextLine().trim();
+                        if (ordenInput.equalsIgnoreCase("true")) {
+                            ordenAscendente = true;
+                            break;
+                        } else if (ordenInput.equalsIgnoreCase("false")) {
+                            ordenAscendente = false;
+                            break;
+                        } else {
+                            System.out.println("Entrada no válida. Por favor, ingrese 'true' para ascendente o 'false' para descendente.");
+                        }
+                    }
+
+                    // Ordenar la tabla y mostrar el resultado
+                    try {
+                        Tabla tablaOrdenada = tabla.ordenar(tabla, etiquetas, ordenAscendente);
+                        System.out.println("\nTabla después de ordenar:");
+                        tablaOrdenada.mostrar(5, 5, 10, 0);
+                    } catch (EtiquetaInvalida e) {
+                        System.out.println("Error: " + e.getMessage());
+                    }
+                    break;
+
             case 13:
+                System.out.println("Tabla actual:");
+                tabla.mostrar(5, 5, 10, 0);
+
                 System.out.print("Ingrese el porcentaje de muestreo: ");
                 int porcentaje = scanner.nextInt();
                 tabla.muestrear(porcentaje, 10);

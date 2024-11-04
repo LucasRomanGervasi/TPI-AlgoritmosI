@@ -550,70 +550,67 @@ public class Tabla implements Visualizacion {
         mostrar(filasMostrar, getCantidadColumnas(), 10, filasDesde);
     }
 
+    // Método filtrar sin cambios
     public Tabla filtrar(String query) throws EtiquetaInvalida, TipoIncompatible {
-        // Crear una lista para almacenar las filas seleccionadas
         List<Object[]> filasSeleccionadas = new ArrayList<>();
-        
-        // Crear la primera fila con las etiquetas de las columnas
+
         Object[] etiquetas = new Object[getCantidadColumnas()];
         for (int j = 0; j < getCantidadColumnas(); j++) {
-            etiquetas[j] = columnas.get(j).getEtiquetaColumna();  // Obtener las etiquetas de las columnas
+            etiquetas[j] = columnas.get(j).getEtiquetaColumna();
         }
-        
-        // Agregar la fila de etiquetas primero
+
         filasSeleccionadas.add(etiquetas);
-        
-        // Obtener todas las filas que cumplan con el filtro
+
         for (int i = 0; i < getCantidadFilas(); i++) {
             if (evaluarFila(i, query)) {
-                // Crear un array que representa una fila
-                Object[] valorFila = new Object[getCantidadColumnas()]; // Array para una fila
+                Object[] valorFila = new Object[getCantidadColumnas()];
                 for (int j = 0; j < getCantidadColumnas(); j++) {
-                    valorFila[j] = columnas.get(j).getValor(i); // Obtener el valor de la columna
+                    valorFila[j] = columnas.get(j).getValor(i);
                 }
-                filasSeleccionadas.add(valorFila); // Agregar la fila a la lista
+                filasSeleccionadas.add(valorFila);
             }
         }
-    
-        // Si no se seleccionó ninguna fila, devolver una tabla vacía con solo etiquetas
-        if (filasSeleccionadas.size() == 1) { // Solo contiene etiquetas
-            throw new IllegalArgumentException("No se encontraron filas que coincidan con los criterios de filtrado.");  // Solo etiquetas sin datos
+
+        if (filasSeleccionadas.size() == 1) {
+            throw new IllegalArgumentException("No se encontraron filas que coincidan con los criterios de filtrado.");
         }
-    
-        // Crear la tabla filtrada a partir de la matriz de filas seleccionadas
-        return new Tabla(filasSeleccionadas.toArray(new Object[0][])); // Usar la lista de filas seleccionadas
+
+        return new Tabla(filasSeleccionadas.toArray(new Object[0][]));
     }
-     
-    // Este método evalúa si una fila cumple con la condición del query
+
     private boolean evaluarFila(int fila, String query) throws EtiquetaInvalida {
-        // Separar las condiciones utilizando operadores lógicos como delimitadores
         List<String> condiciones = new ArrayList<>();
         List<String> operadoresLogicos = new ArrayList<>();
-
-        // Identificar condiciones y operadores
+    
         String[] partesQuery = query.split(" ");
         for (int i = 0; i < partesQuery.length; i++) {
             String parte = partesQuery[i].trim();
-            if (parte.equals("and") || parte.equals("or") || parte.equals("not")) {
-                operadoresLogicos.add(parte);
+            if (parte.equalsIgnoreCase("and") || parte.equalsIgnoreCase("or")) {
+                operadoresLogicos.add(parte.toLowerCase());
+            } else if (parte.equalsIgnoreCase("not")) {
+                if (i + 3 < partesQuery.length) {
+                    // NOT debe aplicarse a la siguiente condición, capturándola y aplicando negación
+                    condiciones.add("not " + partesQuery[i + 1] + " " + partesQuery[i + 2] + " " + partesQuery[i + 3]);
+                    i += 3;
+                } else {
+                    throw new IllegalArgumentException("La condición está incompleta después de NOT: " + parte);
+                }
             } else {
-                // Asegúrate de que el índice no exceda el tamaño del arreglo
                 if (i + 2 < partesQuery.length) {
                     condiciones.add(partesQuery[i] + " " + partesQuery[i + 1] + " " + partesQuery[i + 2]);
-                    i += 2; // Saltar operador y valor
+                    i += 2;
                 } else {
                     throw new IllegalArgumentException("La condición está incompleta: " + parte);
                 }
             }
         }
-
-        boolean resultado = evaluarCondicionSimple(fila, condiciones.get(0));  // Evaluar la primera condición
-
-        // Evaluar las siguientes condiciones con operadores lógicos
+    
+        boolean resultado = evaluarCondicionLogica(fila, condiciones.get(0));
+    
         for (int i = 1; i < condiciones.size(); i++) {
-            String operador = operadoresLogicos.get(i - 1);  // Obtenemos el operador previo a la condición
-            boolean siguienteCondicion = evaluarCondicionSimple(fila, condiciones.get(i));
-
+            String operador = operadoresLogicos.get(i - 1);
+            boolean siguienteCondicion = evaluarCondicionLogica(fila, condiciones.get(i));
+    
             switch (operador) {
                 case "and":
                     resultado = resultado && siguienteCondicion;
@@ -621,49 +618,62 @@ public class Tabla implements Visualizacion {
                 case "or":
                     resultado = resultado || siguienteCondicion;
                     break;
-                case "not":
-                    resultado = resultado && !siguienteCondicion;  // NOT aplica solo a la siguiente condición
-                    break;
+                default:
+                    throw new IllegalArgumentException("Operador lógico no válido: " + operador);
             }
         }
-
+    
         return resultado;
     }
+    
+    private boolean evaluarCondicionLogica(int fila, String condicion) throws EtiquetaInvalida {
+        boolean esNegada = condicion.startsWith("not ");
+        if (esNegada) {
+            condicion = condicion.substring(4); // Quitar "not " para evaluar la condición sin negación
+        }
+    
+        boolean resultadoCondicion = evaluarCondicionSimple(fila, condicion);
+        return esNegada ? !resultadoCondicion : resultadoCondicion;
+    }
+    
 
     private boolean evaluarCondicionSimple(int fila, String condicion) throws EtiquetaInvalida {
-        // Parsear la condición (por ejemplo, "columna1 > 3")
         String[] partes = condicion.split(" ");
         if (partes.length != 3) {
             throw new IllegalArgumentException("Condición no válida: " + condicion);
         }
-        
+
         String columna = partes[0];
         String operador = partes[1];
         String valorStr = partes[2];
 
-        Object valorCelda = getCelda(fila, columna); // Asegúrate de que getCelda maneje nombres de columnas
+        Object valorCelda = getCelda(fila, columna);
         return evaluarCondicion(valorCelda, operador, valorStr);
     }
 
-
     private boolean evaluarCondicion(Object valorCelda, String operador, String valorComparacion) {
-        if (valorCelda instanceof Number) { // Para Integer y Double
+        if (valorCelda instanceof Number) {
             double valor = Double.parseDouble(valorCelda.toString());
             double valorComp = Double.parseDouble(valorComparacion);
             switch (operador) {
                 case ">": return valor > valorComp;
                 case "<": return valor < valorComp;
                 case "=": return valor == valorComp;
+                case "!=": return valor != valorComp;
+                case ">=": return valor >= valorComp;
+                case "<=": return valor <= valorComp;
+                default: throw new IllegalArgumentException("Operador no soportado: " + operador);
             }
         } else if (valorCelda instanceof Boolean) {
             boolean valor = Boolean.parseBoolean(valorCelda.toString());
             boolean valorComp = Boolean.parseBoolean(valorComparacion);
             return valor == valorComp;
         } else if (valorCelda instanceof String) {
-            return valorCelda.equals(valorComparacion);
+            return operador.equals("=") && valorCelda.equals(valorComparacion);
         }
-        return false; // Si el tipo no es compatible
+        return false;
     }
+
 
     public Tabla hacerCopiaProfunda(Tabla tabla) throws TipoIncompatible, EtiquetaInvalida {
         // Crear una matriz que incluya espacio para las filas y las etiquetas
@@ -761,28 +771,25 @@ public class Tabla implements Visualizacion {
     
                     // Asegúrate de que los valores son comparables
                     if (valor1.getClass() != columna.getTipoDato()) {
-                        try {
-                            valor1 = convertValue(valor1, columna.getTipoDato());
-                        } catch (TipoIncompatible e) {
-                            e.printStackTrace();
-                        }
+                        valor1 = convertValue(valor1, columna.getTipoDato());
                     }
                     if (valor2.getClass() != columna.getTipoDato()) {
-                        try {
-                            valor2 = convertValue(valor2, columna.getTipoDato());
-                        } catch (TipoIncompatible e) {
-                            e.printStackTrace();
-                        }
+                        valor2 = convertValue(valor2, columna.getTipoDato());
                     }
     
                     @SuppressWarnings("unchecked")
                     int comparacion = ((Comparable<Object>) valor1).compareTo(valor2);
+                    
+                    // Aplicar el criterio de orden específico a cada comparación de columna
                     if (comparacion != 0) {
                         return ascendente ? comparacion : -comparacion;
                     }
                 } catch (EtiquetaInvalida e) {
                     e.printStackTrace();
-                }
+                } catch (TipoIncompatible e) {
+                                    // TODO Auto-generated catch block
+                                    e.printStackTrace();
+                                }
             }
             return 0;
         };
@@ -808,20 +815,22 @@ public class Tabla implements Visualizacion {
             for (Columna<?> columna : tablaOrdenada.columnas) {
                 Object valor = columna.getValor(filaOrdenada);
                 try {
-                    // Asegúrate de convertir el valor antes de establecerlo
                     Object valorConvertido = convertValue(valor, columna.getTipoDato());
                     nuevaTabla.setValorCelda(nuevaTabla.getCantidadFilas() - 1, columna.getEtiquetaColumna(), valorConvertido);
                 } catch (TipoIncompatible e) {
                     System.err.println("Error al establecer valor en la columna: " + columna.getEtiquetaColumna());
                     System.err.println("Valor original: " + valor);
                     System.err.println("Tipo esperado: " + columna.getTipoDato().getName());
-                    throw e; // Vuelve a lanzar la excepción
+                    throw e;
                 }
             }
         }
     
         return nuevaTabla;
     }
+    
+    
+    
     
     // Método de conversión de tipos
     private Object convertValue(Object value, Class<?> targetType) throws TipoIncompatible {
