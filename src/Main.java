@@ -196,21 +196,17 @@ public class Main {
                     System.out.print("Ingrese un nuevo valor para la celda en el tipo " + tipoColumna.getSimpleName() + ": ");
                     String valorIngresado = scanner.next();
             
-                    try {
-                        // Validar el tipo de dato ingresado y asignarlo a nuevoValor
-                        if (tipoColumna == Integer.class) {
-                            nuevoValor = Integer.parseInt(valorIngresado);
-                        } else if (tipoColumna == Double.class) {
-                            nuevoValor = Double.parseDouble(valorIngresado);
-                        } else if (tipoColumna == Boolean.class) {
-                            nuevoValor = Boolean.parseBoolean(valorIngresado);
-                        } else if (tipoColumna == String.class) {
-                            nuevoValor = valorIngresado;
-                        }
-                        valorValido = true;
-                    } catch (Exception e) {
-                        System.out.println("El valor ingresado no coincide con el tipo " + tipoColumna.getSimpleName() + ". Intente nuevamente.");
+                    // Validar el tipo de dato ingresado y asignarlo a nuevoValor
+                    if (tipoColumna == Integer.class) {
+                        nuevoValor = Integer.parseInt(valorIngresado);
+                    } else if (tipoColumna == Double.class) {
+                        nuevoValor = Double.parseDouble(valorIngresado);
+                    } else if (tipoColumna == Boolean.class) {
+                        nuevoValor = Boolean.parseBoolean(valorIngresado);
+                    } else if (tipoColumna == String.class) {
+                        nuevoValor = valorIngresado;
                     }
+                    valorValido = true;
                 }
             
                 System.out.println("Tabla actual antes de la modificación:");
