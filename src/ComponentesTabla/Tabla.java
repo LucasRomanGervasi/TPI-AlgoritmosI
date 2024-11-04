@@ -525,7 +525,10 @@ public class Tabla implements Visualizacion {
                             columna.setValor(i, 0); // Establece el valor como 0
                         } else if (columna.getTipoDato() == Boolean.class) {
                             columna.setValor(i, false); // Establece el valor como false
+                        } else if (columna.getTipoDato() == Double.class) {
+                            columna.setValor(i, 0.0); // Establece el valor como 0.0
                         }
+
                     } catch (TipoIncompatible e) {
                         // Manejo de la excepción en caso de tipo incompatible
                         System.err.println("No se pudo establecer el valor vacío en la columna " + columna.getEtiquetaColumna() + ": " + e.getMessage());
@@ -745,7 +748,7 @@ public class Tabla implements Visualizacion {
         return new Tabla(matrizInicial);
     }
 
-    public Tabla ordenar(Tabla tabla, List<String> etiquetasColumnas, boolean ascendente) throws EtiquetaInvalida, TipoIncompatible {
+    public Tabla ordenar(Tabla tabla, List<String> etiquetasColumnas, List<Boolean> ordenAscendente) throws EtiquetaInvalida, TipoIncompatible {
         // Hacer una copia profunda de la tabla original
         Tabla tablaOrdenada = hacerCopiaProfunda(tabla);
     
@@ -758,7 +761,10 @@ public class Tabla implements Visualizacion {
     
         // Crear un comparador para las filas basado en las etiquetas de las columnas
         Comparator<Integer> comparadorFilas = (fila1, fila2) -> {
-            for (String etiqueta : etiquetasColumnas) {
+            for (int i = 0; i < etiquetasColumnas.size(); i++) {
+                String etiqueta = etiquetasColumnas.get(i);
+                boolean ascendente = ordenAscendente.get(i); // Orden específico para esta columna
+                
                 Columna<?> columna;
                 try {
                     columna = tablaOrdenada.getColumna(etiqueta);
@@ -779,17 +785,15 @@ public class Tabla implements Visualizacion {
     
                     @SuppressWarnings("unchecked")
                     int comparacion = ((Comparable<Object>) valor1).compareTo(valor2);
-                    
-                    // Aplicar el criterio de orden específico a cada comparación de columna
+    
                     if (comparacion != 0) {
                         return ascendente ? comparacion : -comparacion;
                     }
                 } catch (EtiquetaInvalida e) {
                     e.printStackTrace();
                 } catch (TipoIncompatible e) {
-                                    // TODO Auto-generated catch block
-                                    e.printStackTrace();
-                                }
+                    e.printStackTrace();
+                }
             }
             return 0;
         };
@@ -828,9 +832,6 @@ public class Tabla implements Visualizacion {
     
         return nuevaTabla;
     }
-    
-    
-    
     
     // Método de conversión de tipos
     private Object convertValue(Object value, Class<?> targetType) throws TipoIncompatible {
