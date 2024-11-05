@@ -1,4 +1,5 @@
 package ComponentesTabla;
+import Excepciones.DimensionesIncompatibles;
 import Excepciones.EtiquetaInvalida;
 import Excepciones.TipoIncompatible;
 import Interfaces.*;
@@ -42,58 +43,31 @@ public class Tabla implements Visualizacion {
     private void crearDesdeMatriz(Object[][] matriz) throws TipoIncompatible, EtiquetaInvalida {
         columnas = new ArrayList<>();
         indicesColumnas = new HashMap<>();
-        
+    
         // Verificar si la matriz es nula o no tiene filas suficientes
         if (matriz == null || matriz.length < 1) {
             throw new IllegalArgumentException("La matriz es nula o no tiene suficientes filas.");
         }
-        
+    
         // Crear columnas basadas en la primera fila de la matriz (etiquetas)
         for (int j = 0; j < matriz[0].length; j++) {
             if (!(matriz[0][j] instanceof String || matriz[0][j] instanceof Integer)) {
                 throw new EtiquetaInvalida("La etiqueta de la columna debe ser un String o Integer.");
             }
-            
+    
             String etiqueta = matriz[0][j].toString();
-            Class<?> tipoDato = null; // Tipo inicial nulo para detección
-            boolean tipoUniforme = true; // Variable para verificar si todos los tipos son iguales
-            
-            // Determinar el tipo de dato de la columna basándonos en los datos (ignorar valores nulos o NA/NAN)
-            for (int i = 1; i < matriz.length; i++) {
-                if (matriz[i].length > j) {
-                    Object valor = matriz[i][j];
-                    if (valor != null && !valor.equals("NA") && !valor.equals("NAN")) {
-                        Class<?> tipoActual = valor.getClass();
-                        if (tipoDato == null) {
-                            // Asignar el primer tipo encontrado
-                            tipoDato = tipoActual;
-                        } else if (!tipoDato.equals(tipoActual)) {
-                            // Si hay una discrepancia, definir tipo como String y salir del bucle
-                            tipoDato = String.class;
-                            tipoUniforme = false;
-                            break;
-                        }
-                    }
-                }
-            }
-            
-            // Si no se detectó ningún tipo o hubo una discrepancia, asignar String como tipo por defecto
-            if (tipoDato == null || !tipoUniforme) {
-                tipoDato = String.class;
-            }
-            
-            // Agregar la columna con la etiqueta y el tipo detectado
+            Class<?> tipoDato = determinarTipoColumna(matriz, j); // Determinar el tipo de la columna
             agregarColumna(etiqueta, tipoDato);
             indicesColumnas.put(etiqueta, columnas.size() - 1);
         }
-        
+    
         // Agregar filas a la tabla
         for (int i = 1; i < matriz.length; i++) {
             agregarFila();
             for (int j = 0; j < matriz[i].length; j++) {
                 if (j < columnas.size()) {
                     Object valor = matriz[i][j];
-                    
+    
                     // Mantener null sin asignar valor predeterminado
                     if (valor == null || valor.equals("NA") || valor.equals("NAN")) {
                         valor = null;
@@ -115,20 +89,78 @@ public class Tabla implements Visualizacion {
         }
     }
     
+    // Método para determinar el tipo de cada columna
+    private Class<?> determinarTipoColumna(Object[][] matriz, int columnaIndex) {
+        boolean esEntero = true;
+        boolean esDouble = true;
+        boolean esBoolean = true;
+    
+        for (int i = 1; i < matriz.length; i++) {
+            Object valor = matriz[i][columnaIndex];
+    
+            // Ignorar null, NA y NAN
+            if (valor == null || valor.equals("NA") || valor.equals("NAN")) continue;
+    
+            String valorStr = valor.toString();
+            
+            // Verificar Integer
+            if (esEntero) {
+                try {
+                    Integer.parseInt(valorStr);
+                } catch (NumberFormatException e) {
+                    esEntero = false;
+                }
+            }
+    
+            // Verificar Double
+            if (esDouble) {
+                try {
+                    Double.parseDouble(valorStr);
+                } catch (NumberFormatException e) {
+                    esDouble = false;
+                }
+            }
+    
+            // Verificar Boolean
+            if (esBoolean) {
+                if (!valorStr.equalsIgnoreCase("true") && !valorStr.equalsIgnoreCase("false")) {
+                    esBoolean = false;
+                }
+            }
+    
+            // Si todos los tipos fallan, la columna es de tipo String
+            if (!esEntero && !esDouble && !esBoolean) {
+                return String.class;
+            }
+        }
+    
+        // Prioridad en tipos: Integer > Double > Boolean > String
+        if (esEntero) return Integer.class;
+        if (esDouble) return Double.class;
+        if (esBoolean) return Boolean.class;
+        return String.class;
+    }
     
     // Método para convertir valores al tipo de dato correspondiente
     private Object convertirValor(Object valor, Class<?> tipoColumna) throws TipoIncompatible {
-        if (tipoColumna == Integer.class) {
-            return Integer.parseInt(valor.toString());
-        } else if (tipoColumna == Double.class) {
-            return Double.parseDouble(valor.toString());
-        } else if (tipoColumna == Boolean.class) {
-            return Boolean.parseBoolean(valor.toString());
-        } else if (tipoColumna == String.class) {
-            return valor.toString();
+        String valorStr = valor.toString();
+    
+        try {
+            if (tipoColumna == Integer.class) {
+                return Integer.parseInt(valorStr);
+            } else if (tipoColumna == Double.class) {
+                return Double.parseDouble(valorStr);
+            } else if (tipoColumna == Boolean.class) {
+                return Boolean.parseBoolean(valorStr);
+            } else if (tipoColumna == String.class) {
+                return valorStr;
+            }
+        } catch (NumberFormatException e) {
+            throw new TipoIncompatible("No se puede convertir el valor a " + tipoColumna.getName());
         }
-        throw new TipoIncompatible("No se puede convertir el valor a " + tipoColumna.getName());
+        return valorStr; // Retornar como String si no se reconoce el tipo
     }
+    
     
     
     private void crearDesdeArchivoCSV(String rutaArchivoCSV, boolean headers) throws IOException, TipoIncompatible, EtiquetaInvalida {
@@ -264,22 +296,17 @@ public class Tabla implements Visualizacion {
                     } else {
                         // Comprobar si el valor es del tipo esperado
                         if (!tipoEsperado.isInstance(valor)) {
-                            // Si no es del tipo esperado, intentar convertirlo
-                            try {
-                                valor = convertirValor(valor, tipoEsperado);
-                            } catch (TipoIncompatible e) {
-                                throw new TipoIncompatible(
-                                    "El valor en la columna " + etiquetaColumna + " no es compatible. Se esperaba: "
-                                    + tipoEsperado.getSimpleName() + ", pero se encontró: " + valor.getClass().getSimpleName()
-                                );
-                            }
+                            // Intentar convertir el valor al tipo esperado
+                            valor = convertirValor(valor.toString(), tipoEsperado);
                         }
+    
                         setValorCelda(getCantidadFilas() - 1, etiquetaColumna, valor);
                     }
                 }
             }
         }
     }
+    
 
     public int getCantidadColumnas() {
         return columnas.size();
@@ -699,10 +726,10 @@ public class Tabla implements Visualizacion {
         return new Tabla(matrizInicial);
     }
 
-    public Tabla concatenar(Tabla otraTabla) throws TipoIncompatible, EtiquetaInvalida {
+    public Tabla concatenar(Tabla otraTabla) throws TipoIncompatible, EtiquetaInvalida, DimensionesIncompatibles {
         // Verificar que las dos tablas tienen el mismo número de columnas
         if (this.getCantidadColumnas() != otraTabla.getCantidadColumnas()) {
-            throw new TipoIncompatible("Las tablas no tienen la misma cantidad de columnas.");
+            throw new DimensionesIncompatibles("Las tablas no tienen la misma cantidad de columnas.");
         }
     
         // Verificar que las etiquetas de las columnas y los tipos coinciden
