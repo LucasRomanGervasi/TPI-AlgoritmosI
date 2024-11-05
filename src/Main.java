@@ -457,92 +457,159 @@ public class Main {
                 tabla.muestrear(porcentaje, 10);
                 break;
 
-            case 11:
-                Object[][] datosEj = {
-                    {"Nombre", "Edad", "Altura"},
-                    {"NAN", null, 1.60},
-                    {"Ricardo", 39, 1.95},
-                    {"NA", 19, null}
+                case 11:
+                if (tablaIngresadaManual) {
+                    // Mostrar y eliminar NA si la tabla fue ingresada manualmente
+                    System.out.println("Tabla antes de eliminar valores NA:");
+                    tabla.mostrar(5, 5, 10, 0);
+            
+                    tabla.eliminarTodosNAs();
+                    System.out.println("Tabla después de eliminar valores NA:");
+                    tabla.mostrar(5, 5, 10, 0);
+                } else {
+                    // Si se cargó la tabla de ejemplo, ejecutar el caso de ejemplo planteado
+                    Object[][] datosEj = {
+                        {"Nombre", "Edad", "Altura"},
+                        {"NAN", null, 1.60},
+                        {"Ricardo", 39, 1.95},
+                        {"NA", 19, null}
                     };
-                Tabla tablaEj = new Tabla(datosEj);
-                System.out.println("Tabla antes de eliminar valores NA:");
-                tablaEj.mostrar(5, 5, 10, 0);
-
-                tablaEj.eliminarTodosNAs();
-                System.out.println("Tabla después de eliminar valores NA:");
-                tablaEj.mostrar(5, 5, 10, 0);
-
+                    Tabla tablaEj = new Tabla(datosEj);
+                    System.out.println("Tabla antes de eliminar valores NA:");
+                    tablaEj.mostrar(5, 5, 10, 0);
+            
+                    tablaEj.eliminarTodosNAs();
+                    System.out.println("Tabla después de eliminar valores NA:");
+                    tablaEj.mostrar(5, 5, 10, 0);
+                }
                 break;
+            
 
-            case 12:
-                Object[][] datosAgrupar = {
-                    {"Nombre", "Producto", "Cantidad", "Precio"},
-                    {"Lucas", "A", 10, 100.0},
-                    {"Ana", "B", 5, 200.0},
-                    {"Juan", "A", 15, 150.0},
-                    {"Lucas", "B", 20, 250.0},
-                    {"Ana", "A", 10, 120.0},
-                    {"Juan", "B", 5, 220.0},
-                    {"Lucas", "A", 5, 110.0},
-                    {"Ana", "B", 10, 210.0},
-                    {"Juan", "A", 20, 160.0},
-                    {"Roberto", "B", 15, 230.0}
-                };
-
-                Tabla tablaAgrupar = new Tabla(datosAgrupar);
-
-                System.out.println("Seleccione la operación para agrupar:");
-                System.out.println("1 - Suma");
-                System.out.println("2 - Máximo");
-                System.out.println("3 - Mínimo");
-                System.out.println("4 - Cuenta");
-                System.out.println("5 - Media");
-                System.out.println("6 - Varianza");
-                System.out.println("7 - Desvío estándar");
-
-                int operacionSeleccionada = scanner.nextInt();
-                Operacion operacion = null;
-                switch (operacionSeleccionada) {
-                    case 1 -> operacion = Operacion.SUMA;
-                    case 2 -> operacion = Operacion.MAXIMO;
-                    case 3 -> operacion = Operacion.MINIMO;
-                    case 4 -> operacion = Operacion.CUENTA;
-                    case 5 -> operacion = Operacion.MEDIA;
-                    case 6 -> operacion = Operacion.VARIANZA;
-                    case 7 -> operacion = Operacion.DESVIO;
-                    default -> System.out.println("Opción inválida.");
-                }
-                if (operacion == null) break;
-
-                System.out.println("Tabla a agrupar:");
-                tablaAgrupar.mostrar(10, 5, 10, 0);
-
-                System.out.println("Etiquetas de la tabla disponibles para agrupar:");
-                List<Object> etiquetasDisponibles = tablaAgrupar.getEtiquetasColumnas();
-                for (int i = 0; i < etiquetasDisponibles.size(); i++) {
-                    System.out.println((i + 1) + " - " + etiquetasDisponibles.get(i));
-                }
-
-                List<String> etiquetasAgrupamiento = new ArrayList<>();
-                System.out.println("Ingrese los números de las etiquetas para agrupar (separados por comas):");
-                String inputEtiquetas = scanner.next();
-                String[] indicesEtiquetas = inputEtiquetas.split(",");
-                for (String indice : indicesEtiquetas) {
-                    try {
-                        int idx = Integer.parseInt(indice.trim()) - 1;
-                        if (idx < 0 || idx >= etiquetasDisponibles.size()) {
-                            System.out.println("Índice inválido: " + indice);
-                            continue;
-                        }
-                        etiquetasAgrupamiento.add(etiquetasDisponibles.get(idx).toString());
-                    } catch (Exception e) {
-                        System.out.println("Índice inválido: " + indice);
+                case 12:
+                if (tablaIngresadaManual) {
+                    // Mostrar y agrupar si la tabla fue ingresada manualmente
+                    System.out.println("Seleccione la operación para agrupar:");
+                    System.out.println("1 - Suma");
+                    System.out.println("2 - Máximo");
+                    System.out.println("3 - Mínimo");
+                    System.out.println("4 - Cuenta");
+                    System.out.println("5 - Media");
+                    System.out.println("6 - Varianza");
+                    System.out.println("7 - Desvío estándar");
+            
+                    int operacionSeleccionada = scanner.nextInt();
+                    Operacion operacion = null;
+                    switch (operacionSeleccionada) {
+                        case 1 -> operacion = Operacion.SUMA;
+                        case 2 -> operacion = Operacion.MAXIMO;
+                        case 3 -> operacion = Operacion.MINIMO;
+                        case 4 -> operacion = Operacion.CUENTA;
+                        case 5 -> operacion = Operacion.MEDIA;
+                        case 6 -> operacion = Operacion.VARIANZA;
+                        case 7 -> operacion = Operacion.DESVIO;
+                        default -> System.out.println("Opción inválida.");
                     }
+                    if (operacion == null) break;
+            
+                    System.out.println("Tabla a agrupar:");
+                    tabla.mostrar(10, 5, 10, 0);
+            
+                    System.out.println("Etiquetas de la tabla disponibles para agrupar:");
+                    List<Object> etiquetasDisponibles = tabla.getEtiquetasColumnas();
+                    for (int i = 0; i < etiquetasDisponibles.size(); i++) {
+                        System.out.println((i + 1) + " - " + etiquetasDisponibles.get(i));
+                    }
+            
+                    List<String> etiquetasAgrupamiento = new ArrayList<>();
+                    System.out.println("Ingrese los números de las etiquetas para agrupar (separados por comas):");
+                    String inputEtiquetas = scanner.next();
+                    String[] indicesEtiquetas = inputEtiquetas.split(",");
+                    for (String indice : indicesEtiquetas) {
+                        try {
+                            int idx = Integer.parseInt(indice.trim()) - 1;
+                            if (idx < 0 || idx >= etiquetasDisponibles.size()) {
+                                System.out.println("Índice inválido: " + indice);
+                                continue;
+                            }
+                            etiquetasAgrupamiento.add(etiquetasDisponibles.get(idx).toString());
+                        } catch (Exception e) {
+                            System.out.println("Índice inválido: " + indice);
+                        }
+                    }
+            
+                    Tabla tablaAgrupada = tabla.agregarPor(etiquetasAgrupamiento, operacion);
+                    System.out.println("Tabla agrupada:");
+                    tablaAgrupada.mostrar(5, 5, 10, 0);
+                } else {
+                    // Si se cargó la tabla de ejemplo, ejecutar el caso de ejemplo planteado
+                    Object[][] datosAgrupar = {
+                        {"Nombre", "Producto", "Cantidad", "Precio"},
+                        {"Lucas", "A", 10, 100.0},
+                        {"Ana", "B", 5, 200.0},
+                        {"Juan", "A", 15, 150.0},
+                        {"Lucas", "B", 20, 250.0},
+                        {"Ana", "A", 10, 120.0},
+                        {"Juan", "B", 5, 220.0},
+                        {"Lucas", "A", 5, 110.0},
+                        {"Ana", "B", 10, 210.0},
+                        {"Juan", "A", 20, 160.0},
+                        {"Roberto", "B", 15, 230.0}
+                    };
+                    Tabla tablaAgrupar = new Tabla(datosAgrupar);
+            
+                    System.out.println("Seleccione la operación para agrupar:");
+                    System.out.println("1 - Suma");
+                    System.out.println("2 - Máximo");
+                    System.out.println("3 - Mínimo");
+                    System.out.println("4 - Cuenta");
+                    System.out.println("5 - Media");
+                    System.out.println("6 - Varianza");
+                    System.out.println("7 - Desvío estándar");
+            
+                    int operacionSeleccionada = scanner.nextInt();
+                    Operacion operacion = null;
+                    switch (operacionSeleccionada) {
+                        case 1 -> operacion = Operacion.SUMA;
+                        case 2 -> operacion = Operacion.MAXIMO;
+                        case 3 -> operacion = Operacion.MINIMO;
+                        case 4 -> operacion = Operacion.CUENTA;
+                        case 5 -> operacion = Operacion.MEDIA;
+                        case 6 -> operacion = Operacion.VARIANZA;
+                        case 7 -> operacion = Operacion.DESVIO;
+                        default -> System.out.println("Opción inválida.");
+                    }
+                    if (operacion == null) break;
+            
+                    System.out.println("Tabla a agrupar:");
+                    tablaAgrupar.mostrar(10, 5, 10, 0);
+            
+                    System.out.println("Etiquetas de la tabla disponibles para agrupar:");
+                    List<Object> etiquetasDisponibles = tablaAgrupar.getEtiquetasColumnas();
+                    for (int i = 0; i < etiquetasDisponibles.size(); i++) {
+                        System.out.println((i + 1) + " - " + etiquetasDisponibles.get(i));
+                    }
+            
+                    List<String> etiquetasAgrupamiento = new ArrayList<>();
+                    System.out.println("Ingrese los números de las etiquetas para agrupar (separados por comas):");
+                    String inputEtiquetas = scanner.next();
+                    String[] indicesEtiquetas = inputEtiquetas.split(",");
+                    for (String indice : indicesEtiquetas) {
+                        try {
+                            int idx = Integer.parseInt(indice.trim()) - 1;
+                            if (idx < 0 || idx >= etiquetasDisponibles.size()) {
+                                System.out.println("Índice inválido: " + indice);
+                                continue;
+                            }
+                            etiquetasAgrupamiento.add(etiquetasDisponibles.get(idx).toString());
+                        } catch (Exception e) {
+                            System.out.println("Índice inválido: " + indice);
+                        }
+                    }
+            
+                    Tabla tablaAgrupada = tablaAgrupar.agregarPor(etiquetasAgrupamiento, operacion);
+                    System.out.println("Tabla agrupada:");
+                    tablaAgrupada.mostrar(5, 5, 10, 0);
                 }
-
-                Tabla tablaAgrupada = tablaAgrupar.agregarPor(etiquetasAgrupamiento, operacion);
-                System.out.println("Tabla agrupada:");
-                tablaAgrupada.mostrar(5, 5, 10, 0);
                 break;
         }
 
