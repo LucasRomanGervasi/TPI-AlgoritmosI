@@ -5,59 +5,100 @@ import Excepciones.EtiquetaInvalida;
 import Excepciones.TipoIncompatible;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public class Main {
     private static boolean tablaIngresadaManual = false;
-    public static void main(String[] args) throws TipoIncompatible, EtiquetaInvalida {
+
+    public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        boolean continuar = true;
-        Tabla tabla = null;
+        boolean continuarPrograma = true;
 
-        while (continuar) {
-            // Si la tabla no se ha cargado aún, preguntar cómo desea cargarla
-            if (tabla == null) {
-                tabla = elegirTabla(scanner);
-            }
+        while (continuarPrograma) {
+            Tabla tabla = null;
 
-            System.out.println("Seleccione una operación:");
-            System.out.println("1. Modificar valor en una tabla");
-            System.out.println("2. Eliminar columna");
-            System.out.println("3. Eliminar fila");
-            System.out.println("4. Mostrar primeras filas (head)");
-            System.out.println("5. Mostrar últimas filas (tail)");
-            System.out.println("6. Concatenar tablas");
-            System.out.println("7. Crear copia profunda");
-            System.out.println("8. Filtrar tabla");
-            System.out.println("9. Ordenar tabla");
-            System.out.println("10. Muestrear tabla");
-            System.out.println("11. Eliminar valores NA");
-            System.out.println("12. Agrupar tabla");
-            System.out.println("0. Salir");
+            // Bucle principal del programa
+            while (true) {
+                try {
+                    // Si la tabla no se ha cargado aún, preguntar cómo desea cargarla
+                    if (tabla == null) {
+                        tabla = elegirTabla(scanner);
+                    }
 
-            System.out.print("Ingrese su opción: ");
-            int opcion = scanner.nextInt();
-            scanner.nextLine(); // Consumir nueva línea
+                    // Preguntar al usuario qué operación desea realizar
+                    boolean continuarOperaciones = true;
+                    while (continuarOperaciones) {
+                        System.out.println("Seleccione una operación:");
+                        System.out.println("1. Modificar valor en una tabla");
+                        System.out.println("2. Eliminar columna");
+                        System.out.println("3. Eliminar fila");
+                        System.out.println("4. Mostrar primeras filas (head)");
+                        System.out.println("5. Mostrar últimas filas (tail)");
+                        System.out.println("6. Concatenar tablas");
+                        System.out.println("7. Crear copia profunda");
+                        System.out.println("8. Filtrar tabla");
+                        System.out.println("9. Ordenar tabla");
+                        System.out.println("10. Muestrear tabla");
+                        System.out.println("11. Eliminar valores NA");
+                        System.out.println("12. Agrupar tabla");
+                        System.out.println("0. Salir");
 
-            if (opcion == 0) {
-                System.out.println("Saliendo del programa...");
-                break;
-            }
+                        System.out.print("Ingrese su opción: ");
+                        int opcion = obtenerEntero(scanner); // Método para obtener un entero
 
-            ejecutarOperacion(tabla, opcion, scanner);
+                        if (opcion == 0) {
+                            System.out.println("Saliendo del programa...");
+                            continuarPrograma = false;
+                            continuarOperaciones = false;
+                            break;
+                        }
 
-            System.out.print("¿Desea ejecutar otra operación? (1 - Sí, 2 - No): ");
-            int respuesta = scanner.nextInt();
-            if (respuesta != 1) {
-                continuar = false;
+                        // Intentar ejecutar la operación y manejar excepciones
+                        try {
+                            ejecutarOperacion(tabla, opcion, scanner);
+                        } catch (Exception e) {
+                            System.out.println("Ocurrió un error: " + e.getMessage());
+                        }
+
+                        // Preguntar si desea realizar otra operación
+                        System.out.print("¿Desea realizar otra operación? (1 - Sí, 2 - No): ");
+                        int continuar = obtenerEntero(scanner); // Método para obtener un entero
+                        if (continuar != 1) {
+                            continuarOperaciones = false; // Salir del bucle de operaciones
+                        }
+                    }
+                } catch (Exception e) {
+                    System.out.println("Ocurrió un error: " + e.getMessage());
+                    // Aquí puedes manejar cualquier error relacionado con la carga de la tabla
+                    System.out.print("¿Desea volver a cargar la tabla? (1 - Sí, 2 - No): ");
+                    int respuesta = obtenerEntero(scanner); // Método para obtener un entero
+                    if (respuesta == 1) {
+                        tabla = null; // Reiniciar para seleccionar un método diferente
+                    } else {
+                        continuarPrograma = false; // Salir del programa
+                    }
+                }
             }
         }
 
         scanner.close();
         System.out.println("Programa finalizado.");
     }
+
+      private static int obtenerEntero(Scanner scanner) {
+        while (true) {
+            try {
+                return scanner.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.println("Entrada inválida. Por favor, ingrese un número entero.");
+                scanner.nextLine(); // Limpiar el buffer
+            }
+        }
+    }
+
 
     private static Tabla elegirTabla(Scanner scanner) {
         System.out.println("¿Desea cargar una tabla de ejemplo o cargar manualmente?");
@@ -68,7 +109,6 @@ public class Main {
         scanner.nextLine(); // Consumir nueva línea
 
         if (eleccion == 1) {
-            // Tabla de ejemplo
             Object[][] datosEjemplo = {
                 {"Nombre", "Edad", "Altura"},
                 {"Lucas", 25, 1.80},
@@ -90,7 +130,6 @@ public class Main {
 
             switch (metodoCarga) {
                 case 1:
-                    // Ingresar matriz de objetos
                     System.out.print("Ingrese el número de filas: ");
                     int filas = scanner.nextInt();
                     System.out.print("Ingrese el número de columnas: ");
@@ -107,7 +146,6 @@ public class Main {
                     return new Tabla(matriz);
 
                 case 2:
-                    // Ingresar desde archivo CSV
                     System.out.print("Ingrese la ruta del archivo CSV: ");
                     String rutaCSV = scanner.nextLine();
                     System.out.print("¿Desea incluir headers? (true/false): ");
@@ -116,19 +154,17 @@ public class Main {
                     return new Tabla(rutaCSV, incluirHeaders);
 
                 case 3:
-                    // Ingresar desde secuencia lineal
                     System.out.print("Ingrese los elementos de la secuencia (separados por comas): ");
                     String inputSecuencia = scanner.nextLine();
                     
-                    // Crear una lista con un único elemento que sea la lista de los valores
                     List<Object> secuencia = new ArrayList<>();
                     List<Object> fila = Arrays.stream(inputSecuencia.split(","))
-                        .map(String::trim)  // Limpiar espacios
+                        .map(String::trim)
                         .collect(Collectors.toList());
                     
-                    secuencia.add(fila); // Agregar la fila a la lista principal
+                    secuencia.add(fila); 
                 
-                    return new Tabla(secuencia);  // Pasar la lista a la tabla
+                    return new Tabla(secuencia);
 
                 default:
                     System.out.println("Opción inválida. Usando tabla de ejemplo por defecto.");
@@ -145,6 +181,7 @@ public class Main {
             }
         }
     }
+
 
     private static void ejecutarOperacion(Tabla tabla, int opcion, Scanner scanner) throws TipoIncompatible, EtiquetaInvalida {
         switch (opcion) {
