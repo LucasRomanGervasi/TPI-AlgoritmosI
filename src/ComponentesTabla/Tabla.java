@@ -351,11 +351,11 @@ public class Tabla implements Visualizacion {
         return fila;
     }
 
-        public Columna<?> getColumna(String etiqueta) throws EtiquetaInvalida {
-            if (!indicesColumnas.containsKey(etiqueta)) {
-                throw new EtiquetaInvalida("La etiqueta de la columna no existe.");
-            }
-            return columnas.get(indicesColumnas.get(etiqueta));
+        public Columna<?> getColumna(Object etiqueta) throws EtiquetaInvalida {
+                    if (!indicesColumnas.containsKey(etiqueta)) {
+                        throw new EtiquetaInvalida("La etiqueta de la columna no existe.");
+                    }
+                    return columnas.get(indicesColumnas.get(etiqueta));
         }
 
     public Object getCelda(int idFila, String etiquetaColumna) throws EtiquetaInvalida {
@@ -565,6 +565,9 @@ public class Tabla implements Visualizacion {
             for (int i = 0; i < columna.getCeldas().size(); i++) {
                 Object valor = columna.getValor(i);
     
+                // Imprimir el valor para depuración
+                //System.out.println("Valor en la fila " + i + " de la columna " + columna.getEtiquetaColumna() + ": " + valor);
+    
                 // Verificar si el valor es null, "NA", "NAN", o "null"
                 if (valor == null || 
                     valor.equals("NA") || 
@@ -582,7 +585,6 @@ public class Tabla implements Visualizacion {
                         } else if (columna.getTipoDato() == Double.class) {
                             columna.setValor(i, 0.0); // Establece el valor como 0.0
                         }
-
                     } catch (TipoIncompatible e) {
                         // Manejo de la excepción en caso de tipo incompatible
                         System.err.println("No se pudo establecer el valor vacío en la columna " + columna.getEtiquetaColumna() + ": " + e.getMessage());
@@ -591,6 +593,8 @@ public class Tabla implements Visualizacion {
             }
         }
     }
+    
+    
     
 
     public void head(int n) {
@@ -802,130 +806,97 @@ public class Tabla implements Visualizacion {
         return new Tabla(matrizInicial);
     }
 
-        public Tabla ordenar(Tabla tabla, List<String> etiquetasColumnas, List<Boolean> ordenAscendente) throws EtiquetaInvalida, TipoIncompatible {
-            // Hacer una copia profunda de la tabla original
-            Tabla tablaOrdenada = hacerCopiaProfunda(tabla);
+    public Tabla ordenar(Tabla tabla, List<String> etiquetasColumnas, List<Boolean> ordenAscendente) throws EtiquetaInvalida, TipoIncompatible {
+        Tabla tablaOrdenada = hacerCopiaProfunda(tabla);
         
-            // Validar que las etiquetas de las columnas existan
-            for (String etiqueta : etiquetasColumnas) {
-                if (!tablaOrdenada.indicesColumnas.containsKey(etiqueta)) {
-                    throw new EtiquetaInvalida("La etiqueta de la columna '" + etiqueta + "' no existe.");
-                }
-            }
-        
-            // Obtener los índices de fila y ordenarlos
-            List<Integer> indicesFilas = new ArrayList<>();
-            for (int i = 0; i < tabla.getCantidadFilas(); i++) {
-                indicesFilas.add(i);
-            }
-        
-            // Crear un comparador para las filas basado en las etiquetas de las columnas
-            indicesFilas.sort((fila1, fila2) -> {
-                for (int i = 0; i < etiquetasColumnas.size(); i++) {
-                    String etiqueta = etiquetasColumnas.get(i);
-                    boolean ascendente = ordenAscendente.get(i);
-        
-                    try {
-                        Columna<?> columna = tablaOrdenada.getColumna(etiqueta);
-                        Object valor1 = columna.getValor(fila1);
-                        Object valor2 = columna.getValor(fila2);
-        
-                        if (valor1 == null && valor2 == null) return 0;
-                        if (valor1 == null) return ascendente ? -1 : 1;
-                        if (valor2 == null) return ascendente ? 1 : -1;
-        
-                        // Asegurarse de que ambos valores son del mismo tipo y son comparables
-                        if (valor1.getClass() == valor2.getClass()) {
-                            if (valor1 instanceof Comparable) {
-                                @SuppressWarnings("unchecked")
-                                int comparacion = ((Comparable<Object>) valor1).compareTo(valor2);
-                                return ascendente ? comparacion : -comparacion;
-                            } else {
-                                // Manejar el caso donde no son comparables
-                                throw new TipoIncompatible("No se puede comparar los valores de columna: " + etiqueta);
-                            }
-                        } else {
-                            // Log para depuración
-                            System.err.println("Tipos incompatibles: " + valor1.getClass().getName() + " y " + valor2.getClass().getName());
-                            throw new TipoIncompatible("Tipos incompatibles en columna: " + etiqueta + 
-                                                        " - valor1: " + valor1 + " (" + valor1.getClass().getName() + "), " +
-                                                        "valor2: " + valor2 + " (" + valor2.getClass().getName() + ")");
-                        }
-                    } catch (EtiquetaInvalida e) {
-                        e.printStackTrace();
-                    } catch (TipoIncompatible e) {
-                        e.printStackTrace();
-                    }
-                }
-                return 0; // Si todos son iguales, no cambiar el orden
-            });
-        
-            // Crear una nueva tabla ordenada
-            Object[][] matrizInicial = new Object[1][tabla.getCantidadColumnas()];
-            for (int i = 0; i < tabla.getCantidadColumnas(); i++) {
-                matrizInicial[0][i] = tabla.columnas.get(i).getEtiquetaColumna();
-            }
-        
-            Tabla nuevaTabla = new Tabla(matrizInicial);  // Usar matriz para inicializar
-        
-            // Agregar las filas ordenadas a la nueva tabla
-            for (int filaOrdenada : indicesFilas) {
-                nuevaTabla.agregarFila();
-                for (Columna<?> columna : tablaOrdenada.columnas) {
-                    Object valor = columna.getValor(filaOrdenada);
-                    nuevaTabla.setValorCelda(nuevaTabla.getCantidadFilas() - 1, columna.getEtiquetaColumna(), valor);
-                }
-            }
-        
-            return nuevaTabla;
-        }
-        
-    
-    // Método de conversión de tipos
-    
-    
-    
-
-    /* public void imputarValoresFaltantes(Object valorImputacion) {
-        // Recorremos todas las columnas y filas para buscar valores faltantes
-        for (Columna<?> columna : columnas) {
-            for (int i = 0; i < columna.getTamanio(); i++) {
-                Object valorActual = columna.getValor(i);
-    
-                // Verificamos si el valor es nulo o es el literal "NA"
-                if (valorActual == null || "NA".equals(valorActual)) {
-                    try {
-                        columna.setValor(i, valorImputacion);
-                    } catch (TipoIncompatible e) {
-                        System.err.println("Error al imputar valor: " + e.getMessage());
-                    }
-                }
+        // Validar etiquetas de columnas
+        for (String etiqueta : etiquetasColumnas) {
+            if (!tablaOrdenada.indicesColumnas.containsKey(etiqueta)) {
+                throw new EtiquetaInvalida("La etiqueta de la columna '" + etiqueta + "' no existe.");
             }
         }
-    } */
-
-    /* public void imputarValoresFaltantes(String etiquetaColumna, Object valorImputacion) throws EtiquetaInvalida {
-        if (!indicesColumnas.containsKey(etiquetaColumna)) {
-            throw new EtiquetaInvalida("La columna con la etiqueta '" + etiquetaColumna + "' no existe.");
+        
+        // Obtener índices de filas
+        List<Integer> indicesFilas = new ArrayList<>();
+        for (int i = 0; i < tabla.getCantidadFilas(); i++) {
+            indicesFilas.add(i);
         }
+        
+        // Crear un comparador encadenado para las filas
+        indicesFilas.sort((fila1, fila2) -> {
+            for (int i = 0; i < etiquetasColumnas.size(); i++) {
+                String etiqueta = etiquetasColumnas.get(i);
+                boolean ascendente = ordenAscendente.get(i);
     
-        // Obtener la columna por su etiqueta
-        Columna<?> columna = columnas.get(indicesColumnas.get(etiquetaColumna));
-    
-        // Recorremos todas las filas de esa columna
-        for (int i = 0; i < columna.getTamanio(); i++) {
-            Object valorActual = columna.getValor(i);
-    
-            // Verificamos si el valor es nulo o es el literal "NA"
-            if (valorActual == null || "NA".equals(valorActual)) {
                 try {
-                    columna.setValor(i, valorImputacion);
+                    Columna<?> columna = tablaOrdenada.getColumna(etiqueta);
+                    Object valor1 = columna.getValor(fila1);
+                    Object valor2 = columna.getValor(fila2);
+    
+                    // Depuración adicional para revisar el tipo exacto
+                    System.out.println("Tipo columna '" + etiqueta + "': " + columna.getTipoDato());
+                    System.out.println("Comparando valores en columna '" + etiqueta + "': valor1=" + valor1 + " (tipo " + (valor1 != null ? valor1.getClass().getName() : "null") + "), valor2=" + valor2 + " (tipo " + (valor2 != null ? valor2.getClass().getName() : "null") + ")");
+                    
+                    // Validar si ambos valores son null
+                    if (valor1 == null && valor2 == null) continue;
+                    if (valor1 == null) return ascendente ? -1 : 1;
+                    if (valor2 == null) return ascendente ? 1 : -1;
+    
+                    // Comparación basada en tipos específicos
+                    if (valor1 instanceof Integer && valor2 instanceof Integer) {
+                        int comparacion = ((Integer) valor1).compareTo((Integer) valor2);
+                        return ascendente ? comparacion : -comparacion;
+                    } else if (valor1 instanceof Double && valor2 instanceof Double) {
+                        int comparacion = ((Double) valor1).compareTo((Double) valor2);
+                        return ascendente ? comparacion : -comparacion;
+                    } else if (valor1.getClass().equals(valor2.getClass())) {
+                        // Si los tipos son iguales, lanzar error
+                        throw new TipoIncompatible("Los valores en la columna '" + etiqueta + "' tienen tipos incompatibles.");
+                    } else {
+                        // Si los valores no son Integer ni Double, lanzar un error de tipo
+                        System.out.println("Error de tipo: Los valores de la columna '" + etiqueta + "' no son del tipo esperado (Integer o Double).");
+                        throw new TipoIncompatible("El tipo de dato en la columna '" + etiqueta + "' no es compatible con la comparación.");
+                    }
+                } catch (EtiquetaInvalida e) {
+                    System.out.println("Error de etiqueta: " + e.getMessage());
+                    return 0;  // Mantener el orden si hay error en la comparación
                 } catch (TipoIncompatible e) {
-                    System.err.println("Error al imputar valor en columna '" + etiquetaColumna + "': " + e.getMessage());
+                    System.out.println("Error de tipo incompatible: " + e.getMessage());
+                    return 0;  // Mantener el orden si hay un error de tipo
                 }
             }
+            return 0; // Si todos los valores son iguales, mantener el orden actual
+        });
+    
+        // Crear una nueva tabla ordenada aplicando el orden de indicesFilas
+        Tabla nuevaTablaOrdenada = hacerCopiaEstructura(tablaOrdenada);
+        for (int i = 0; i < indicesFilas.size(); i++) {
+            int filaOriginalIndex = indicesFilas.get(i);
+            for (Object etiqueta : tablaOrdenada.getEtiquetasColumnas()) { // Itera sobre etiquetas
+                Columna<?> columna = tablaOrdenada.getColumna(etiqueta); // Obtener columna por etiqueta
+                Object valor = columna.getValor(filaOriginalIndex);
+                nuevaTablaOrdenada.getColumna(etiqueta).setValor(i, valor);  // Copiar celda por celda
+            }
         }
-    } */
+    
+        return nuevaTablaOrdenada;
+    }
+    
+    private Tabla hacerCopiaEstructura(Tabla tablaOriginal) {
+        Object[][] estructuraInicial = new Object[tablaOriginal.getCantidadFilas()][tablaOriginal.getCantidadColumnas()];
+        List<Object> etiquetasColumnas = tablaOriginal.getEtiquetasColumnas(); // Asumiendo que existe un método que retorna las etiquetas
+        for (int i = 0; i < etiquetasColumnas.size(); i++) {
+            estructuraInicial[0][i] = etiquetasColumnas.get(i);
+        }
+        return new Tabla(estructuraInicial);
+    }
+    
+    
+    
+    
+    
+    
+    
 
     @Override
     public void muestrear(double porcentaje, int maxAnchoCelda) {
