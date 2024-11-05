@@ -20,8 +20,6 @@ public class Main {
         while (continuarPrograma) {
             Tabla tabla = null;
 
-            // Bucle principal del programa
-            while (true) {
                 try {
                     // Si la tabla no se ha cargado aún, preguntar cómo desea cargarla
                     if (tabla == null) {
@@ -67,22 +65,16 @@ public class Main {
                         System.out.print("¿Desea realizar otra operación? (1 - Sí, 2 - No): ");
                         int continuar = obtenerEntero(scanner); // Método para obtener un entero
                         if (continuar != 1) {
-                            continuarOperaciones = false; // Salir del bucle de operaciones
+                            continuarOperaciones = false;
+                            break; // Salir del bucle de operaciones
                         }
                     }
                 } catch (Exception e) {
                     System.out.println("Ocurrió un error: " + e.getMessage());
-                    // Aquí puedes manejar cualquier error relacionado con la carga de la tabla
-                    System.out.print("¿Desea volver a cargar la tabla? (1 - Sí, 2 - No): ");
-                    int respuesta = obtenerEntero(scanner); // Método para obtener un entero
-                    if (respuesta == 1) {
-                        tabla = null; // Reiniciar para seleccionar un método diferente
-                    } else {
-                        continuarPrograma = false; // Salir del programa
-                    }
+                    break;
                 }
             }
-        }
+        
 
         scanner.close();
         System.out.println("Programa finalizado.");
@@ -258,7 +250,6 @@ public class Main {
             
                 break;
             
-            // Caso 5
             case 2:
                 System.out.println("Tabla actual antes de eliminar la columna:");
                 tabla.mostrar(5, 5, 10, 0);
@@ -286,7 +277,6 @@ public class Main {
                 tabla.mostrar(5, 5, 10, 0);
                 break;
 
-                // Caso 6
             case 3:
                 System.out.println("Tabla actual antes de eliminar la fila:");
                 tabla.mostrar(5, 5, 10, 0);
@@ -311,7 +301,6 @@ public class Main {
                 tabla.mostrar(5, 5, 10, 0);
                 break;
 
-                // Caso 7 y 8
             case 4:
                 System.out.print("Ingrese la cantidad de filas a mostrar (head): ");
                 int nHead = scanner.nextInt();
@@ -391,7 +380,7 @@ public class Main {
                 System.out.println("Tabla a filtrar: ");
                 tabla.mostrar(5, 5, 10, 0);
             
-                // Solicitar la condición de filtrado al usuario
+                scanner.nextLine(); // Agrega esta línea para limpiar el buffer antes de la lectura
                 System.out.print("Ingrese la condición de filtrado: ");
                 String condicion = scanner.nextLine();
             
@@ -400,57 +389,65 @@ public class Main {
                     Tabla tablaFiltrada = tabla.filtrar(condicion);
                     System.out.println("Tabla después de aplicar el filtro:");
                     tablaFiltrada.mostrar(5, 5, 30, 0);
-                } catch (Exception e) {
+                } catch (EtiquetaInvalida e) {
                     System.out.println("Error: Condicion invalida");
                 }
                 break;
             
-
-                // Caso 12
-            case 9:
-                System.out.println("Tabla actual:");
-                tabla.mostrar(5, 5, 10, 0);
-
-                System.out.println("Etiquetas de columnas disponibles para ordenar:");
-                System.out.println(tabla.getEtiquetasColumnas());
-
-                System.out.print("Ingrese las etiquetas de las columnas para ordenar (separadas por comas): ");
-                String etiquetasInput = scanner.nextLine();
-                List<String> etiquetas = Arrays.stream(etiquetasInput.split(",\\s*"))
-                                            .collect(Collectors.toList());
-
-                List<Boolean> ordenAscendente = new ArrayList<>();
-                for (String etiqueta : etiquetas) {
-                    if (!tabla.getEtiquetasColumnas().contains(etiqueta)) {
-                        System.out.println("Etiqueta inválida: " + etiqueta + ". Operación cancelada.");
-                        break;
-                    }
+                case 9:
+                    System.out.println("Tabla actual:");
+                    tabla.mostrar(5, 5, 10, 0);
                     
-                    while (true) {
-                        System.out.print("¿Desea ordenar la columna '" + etiqueta + "' de manera ascendente (true) o descendente (false)? Ingrese true o false: ");
-                        String ordenInput = scanner.nextLine().trim();
-                        if (ordenInput.equalsIgnoreCase("true")) {
-                            ordenAscendente.add(true);
-                            break;
-                        } else if (ordenInput.equalsIgnoreCase("false")) {
-                            ordenAscendente.add(false);
-                            break;
-                        } else {
-                            System.out.println("Entrada no válida. Por favor, ingrese 'true' para ascendente o 'false' para descendente.");
+                    System.out.println("Etiquetas de columnas disponibles para ordenar:");
+                    System.out.println(tabla.getEtiquetasColumnas());
+                    
+                    scanner.nextLine();
+                    System.out.print("Ingrese las etiquetas de las columnas para ordenar (separadas por comas): ");
+                    String etiquetasInput = scanner.nextLine();
+                    List<String> etiquetas = Arrays.stream(etiquetasInput.split(",\\s*"))
+                                                    .collect(Collectors.toList());
+                    
+                    List<Boolean> ordenAscendente = new ArrayList<>();
+                    boolean etiquetasValidas = true; // Bandera para verificar si se ingresaron etiquetas válidas
+                    
+                    for (String etiqueta : etiquetas) {
+                        if (!tabla.getEtiquetasColumnas().contains(etiqueta)) {
+                            System.out.println("Etiqueta inválida: " + etiqueta + ". Operación cancelada.");
+                            etiquetasValidas = false; // Marcar que hay etiquetas inválidas
+                            continue; // Cambiado a continue para seguir pidiendo etiquetas válidas
+                        }
+                        
+                        while (true) {
+                            System.out.print("¿Desea ordenar la columna '" + etiqueta + "' de manera ascendente (true) o descendente (false)? Ingrese true o false: ");
+                            String ordenInput = scanner.nextLine().trim();
+                            if (ordenInput.equalsIgnoreCase("true")) {
+                                ordenAscendente.add(true);
+                                break;
+                            } else if (ordenInput.equalsIgnoreCase("false")) {
+                                ordenAscendente.add(false);
+                                break;
+                            } else {
+                                System.out.println("Entrada no válida. Por favor, ingrese 'true' para ascendente o 'false' para descendente.");
+                            }
                         }
                     }
-                }
+                    
+                    if (!etiquetasValidas || ordenAscendente.isEmpty()) { // Verificar si no se ingresó ninguna orden
+                        System.out.println("No se realizó ninguna ordenación debido a etiquetas inválidas o falta de orden.");
+                        break; // Salir del caso 9 si no se tiene nada que ordenar
+                    }
+                    
+                    try {
+                        Tabla tablaOrdenada = tabla.ordenar(tabla, etiquetas, ordenAscendente);
+                        System.out.println("\nTabla después de ordenar:");
+                        tablaOrdenada.mostrar(5, 5, 10, 0);
+                    } catch (EtiquetaInvalida e) {
+                        System.out.println("Error: " + e.getMessage());
+                    } catch (TipoIncompatible e) {
+                        System.out.println("Error de tipo incompatible: " + e.getMessage());
+                    }
+                    break;
 
-                try {
-                    Tabla tablaOrdenada = tabla.ordenar(tabla, etiquetas, ordenAscendente);
-                    System.out.println("\nTabla después de ordenar:");
-                    tablaOrdenada.mostrar(5, 5, 10, 0);
-                } catch (EtiquetaInvalida e) {
-                    System.out.println("Error: " + e.getMessage());
-                } catch (TipoIncompatible e) {
-                    System.out.println("Error de tipo incompatible: " + e.getMessage());
-                }
-                break;
             case 10:
                 System.out.println("Tabla actual:");
                 tabla.mostrar(5, 5, 10, 0);
@@ -459,6 +456,7 @@ public class Main {
                 int porcentaje = scanner.nextInt();
                 tabla.muestrear(porcentaje, 10);
                 break;
+
             case 11:
                 Object[][] datosEj = {
                     {"Nombre", "Edad", "Altura"},
@@ -476,7 +474,6 @@ public class Main {
 
                 break;
 
-                // Caso 12
             case 12:
                 Object[][] datosAgrupar = {
                     {"Nombre", "Producto", "Cantidad", "Precio"},
@@ -518,7 +515,7 @@ public class Main {
                 if (operacion == null) break;
 
                 System.out.println("Tabla a agrupar:");
-                tablaAgrupar.mostrar(5, 5, 10, 0);
+                tablaAgrupar.mostrar(10, 5, 10, 0);
 
                 System.out.println("Etiquetas de la tabla disponibles para agrupar:");
                 List<Object> etiquetasDisponibles = tablaAgrupar.getEtiquetasColumnas();
