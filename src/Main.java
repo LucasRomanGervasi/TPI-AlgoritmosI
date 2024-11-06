@@ -384,14 +384,11 @@ public class Main {
                 System.out.print("Ingrese la condición de filtrado: ");
                 String condicion = scanner.nextLine();
             
-                try {
-                    // Realizar el filtrado y mostrar la tabla resultante
-                    Tabla tablaFiltrada = tabla.filtrar(condicion);
-                    System.out.println("Tabla después de aplicar el filtro:");
-                    tablaFiltrada.mostrar(5, 5, 30, 0);
-                } catch (EtiquetaInvalida e) {
-                    System.out.println("Error: Condicion invalida");
-                }
+                // Realizar el filtrado y mostrar la tabla resultante
+                Tabla tablaFiltrada = tabla.filtrar(condicion);
+                System.out.println("Tabla después de aplicar el filtro:");
+                tablaFiltrada.mostrar(5, 5, 30, 0);
+
                 break;
             
                 case 9:
@@ -432,20 +429,18 @@ public class Main {
                         }
                     }
                     
-                    if (!etiquetasValidas || ordenAscendente.isEmpty()) { // Verificar si no se ingresó ninguna orden
-                        System.out.println("No se realizó ninguna ordenación debido a etiquetas inválidas o falta de orden.");
+                    if (!etiquetasValidas) { // Verificar si no se ingresó ninguna orden
+                        System.out.println("No se realizó ninguna ordenación debido a etiquetas inválidas");
                         break; // Salir del caso 9 si no se tiene nada que ordenar
                     }
-                    
-                    try {
-                        Tabla tablaOrdenada = tabla.ordenar(tabla, etiquetas, ordenAscendente);
-                        System.out.println("\nTabla después de ordenar:");
-                        tablaOrdenada.mostrar(5, 5, 10, 0);
-                    } catch (EtiquetaInvalida e) {
-                        System.out.println("Error: " + e.getMessage());
-                    } catch (TipoIncompatible e) {
-                        System.out.println("Error de tipo incompatible: " + e.getMessage());
+                    if (ordenAscendente.isEmpty()) {
+                        System.out.println("No se realizó ninguna ordenación debido a falta de criterios de ordenamiento");
+                        break;
                     }
+                    
+                    Tabla tablaOrdenada = tabla.ordenar(tabla, etiquetas, ordenAscendente);
+                    System.out.println("\nTabla después de ordenar:");
+                    tablaOrdenada.mostrar(5, 5, 10, 0);
                     break;
 
             case 10:
@@ -457,7 +452,7 @@ public class Main {
                 tabla.muestrear(porcentaje, 10);
                 break;
 
-                case 11:
+            case 11:
                 if (tablaIngresadaManual) {
                     // Mostrar y eliminar NA si la tabla fue ingresada manualmente
                     System.out.println("Tabla antes de eliminar valores NA:");
@@ -525,16 +520,12 @@ public class Main {
                     String inputEtiquetas = scanner.next();
                     String[] indicesEtiquetas = inputEtiquetas.split(",");
                     for (String indice : indicesEtiquetas) {
-                        try {
                             int idx = Integer.parseInt(indice.trim()) - 1;
                             if (idx < 0 || idx >= etiquetasDisponibles.size()) {
                                 System.out.println("Índice inválido: " + indice);
                                 continue;
                             }
                             etiquetasAgrupamiento.add(etiquetasDisponibles.get(idx).toString());
-                        } catch (Exception e) {
-                            System.out.println("Índice inválido: " + indice);
-                        }
                     }
             
                     Tabla tablaAgrupada = tabla.agregarPor(etiquetasAgrupamiento, operacion);
@@ -553,7 +544,8 @@ public class Main {
                         {"Lucas", "A", 5, 110.0},
                         {"Ana", "B", 10, 210.0},
                         {"Juan", "A", 20, 160.0},
-                        {"Roberto", "B", 15, 230.0}
+                        {"Roberto", "B", 15, 230.0},
+                        {"Roberto", "A", 25, 130.0}
                     };
                     Tabla tablaAgrupar = new Tabla(datosAgrupar);
             
@@ -594,16 +586,12 @@ public class Main {
                     String inputEtiquetas = scanner.next();
                     String[] indicesEtiquetas = inputEtiquetas.split(",");
                     for (String indice : indicesEtiquetas) {
-                        try {
                             int idx = Integer.parseInt(indice.trim()) - 1;
                             if (idx < 0 || idx >= etiquetasDisponibles.size()) {
                                 System.out.println("Índice inválido: " + indice);
                                 continue;
                             }
                             etiquetasAgrupamiento.add(etiquetasDisponibles.get(idx).toString());
-                        } catch (Exception e) {
-                            System.out.println("Índice inválido: " + indice);
-                        }
                     }
             
                     Tabla tablaAgrupada = tablaAgrupar.agregarPor(etiquetasAgrupamiento, operacion);
