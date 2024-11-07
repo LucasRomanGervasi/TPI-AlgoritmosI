@@ -477,14 +477,14 @@ public class Tabla implements Visualizacion {
         }
         Columna<?> nuevaColumna = new Columna<>(etiqueta, tipoDato);
         for (int i = 0; i < getCantidadFilas(); i++) {
-            nuevaColumna.agregarValor(null); // Asigna un valor nulo por defecto
+            nuevaColumna.agregarCelda(null); // Asigna un valor nulo por defecto
         }
     
         columnas.add(nuevaColumna);
         indicesColumnas.put(etiqueta, columnas.size() - 1);
     }
 
-    public <T> void agregarColumna(String etiqueta, Class<T> tipoDato, List<Object> celdas) throws TipoIncompatible, EtiquetaInvalida {
+    /* public <T> void agregarColumna(String etiqueta, Class<T> tipoDato, List<Object> celdas) throws TipoIncompatible, EtiquetaInvalida {
         if (!(tipoDato == Integer.class || tipoDato == Double.class || tipoDato == Boolean.class || tipoDato == String.class || tipoDato == null)) {
             throw new TipoIncompatible("Tipo de dato no soportado. Solo se permiten: Numérico (entero, real), Booleano y Cadena.");
         }
@@ -500,12 +500,12 @@ public class Tabla implements Visualizacion {
             if (valor != null && !tipoDato.isInstance(valor)) {
                 throw new TipoIncompatible("El valor '" + valor + "' no es compatible con el tipo de dato de la columna " + tipoDato.getSimpleName());
             }
-            nuevaColumna.agregarValor(valor);
+            nuevaColumna.agregarCelda(valor);
         }
         
         columnas.add(nuevaColumna);
         indicesColumnas.put(etiqueta, columnas.size() - 1);
-    }
+    } */
     
     public void eliminarFila(int idFila) throws EtiquetaInvalida {
         if (idFila < 0 || idFila >= getCantidadFilas()) {
