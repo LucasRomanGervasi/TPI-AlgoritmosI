@@ -11,7 +11,6 @@ public class Tabla implements Visualizacion {
     private List<Columna<?>> columnas;
     private Map<String, Integer> indicesColumnas;
 
-
     public Tabla(Object[][] matriz) {
         try {
             crearDesdeMatriz(matriz);
@@ -161,8 +160,6 @@ public class Tabla implements Visualizacion {
         return valorStr; // Retornar como String si no se reconoce el tipo
     }
     
-    
-    
     private void crearDesdeArchivoCSV(String rutaArchivoCSV, boolean headers, int maxCaracteresPorCelda) throws IOException, TipoIncompatible, EtiquetaInvalida {
         if (rutaArchivoCSV == null || rutaArchivoCSV.isEmpty()) {
             throw new IllegalArgumentException("La ruta del archivo CSV no puede estar vacía.");
@@ -228,7 +225,6 @@ public class Tabla implements Visualizacion {
         }
     }
     
-    
     // Método auxiliar para generar etiquetas en caso de no tener encabezados
     private List<String> generarEtiquetas(int numColumnas) {
         List<String> etiquetas = new ArrayList<>();
@@ -268,7 +264,6 @@ public class Tabla implements Visualizacion {
         }
     }
 
-
     private void crearDesdeSecuenciaLineal(List<Object> secuenciaLineal) throws TipoIncompatible, EtiquetaInvalida {
         if (secuenciaLineal == null || secuenciaLineal.isEmpty()) {
             throw new IllegalArgumentException("La secuencia lineal no puede estar vacía.");
@@ -281,35 +276,39 @@ public class Tabla implements Visualizacion {
         List<?> primeraFila = (List<?>) secuenciaLineal.get(0);
         for (int i = 0; i < primeraFila.size(); i++) {
             Object valor = primeraFila.get(i);
-            // Asignar un tipo por defecto de String si el valor es null
             Class<?> tipoColumna = (valor != null) ? valor.getClass() : String.class;
             agregarColumna("Columna" + (i + 1), tipoColumna);
         }
     
-        // Agregar filas verificando tipos
+        // Procesar cada fila y agregar valores a las columnas
         for (Object filaObj : secuenciaLineal) {
             if (filaObj instanceof List) {
                 List<?> fila = (List<?>) filaObj;
-                agregarFila();
-    
+                if (fila.size() != columnas.size()) {
+                    throw new IllegalArgumentException("La fila tiene un número diferente de columnas al esperado.");
+                }
+                
+                agregarFila();  // Agrega una nueva fila vacía
+                
+                // Rellenar las columnas con los valores de la fila
                 for (int i = 0; i < fila.size(); i++) {
                     String etiquetaColumna = "Columna" + (i + 1);
                     Object valor = fila.get(i);
                     Class<?> tipoEsperado = columnas.get(i).getTipoDato();
     
-                    // Permitir null, NA y NAN
+                    // Permitir valores null, "NA" o "NAN"
                     if (valor == null || valor.equals("NA") || valor.equals("NAN")) {
                         setValorCelda(getCantidadFilas() - 1, etiquetaColumna, null);
                     } else {
-                        // Comprobar si el valor es del tipo esperado
+                        // Verificar si el valor es del tipo esperado, y convertirlo si es necesario
                         if (!tipoEsperado.isInstance(valor)) {
-                            // Intentar convertir el valor al tipo esperado
                             valor = convertirValor(valor.toString(), tipoEsperado);
                         }
-    
                         setValorCelda(getCantidadFilas() - 1, etiquetaColumna, valor);
                     }
                 }
+            } else {
+                throw new IllegalArgumentException("Cada fila en la secuencia debe ser una lista de objetos.");
             }
         }
     }
@@ -413,7 +412,6 @@ public class Tabla implements Visualizacion {
         }
     }
     
-    
     // Método auxiliar para truncar o rellenar con espacios los textos de las celdas
     private String formatearTexto(String etiqueta, int maxAncho) {
             // Si el texto es más largo que el máximo ancho permitido, lo truncamos
@@ -472,8 +470,6 @@ public class Tabla implements Visualizacion {
             throw new TipoIncompatible("Error al convertir el valor: " + value + " a tipo: " + targetType.getSimpleName());
         }
     }
-    
-    
 
     public <T> void agregarColumna(String etiqueta, Class<T> tipoDato) throws TipoIncompatible, EtiquetaInvalida {
         if (!(tipoDato == Integer.class || tipoDato == Double.class || tipoDato == Boolean.class || tipoDato == String.class || tipoDato == null)) {
@@ -487,9 +483,30 @@ public class Tabla implements Visualizacion {
         columnas.add(nuevaColumna);
         indicesColumnas.put(etiqueta, columnas.size() - 1);
     }
-    
-    
 
+    public <T> void agregarColumna(String etiqueta, Class<T> tipoDato, List<Object> celdas) throws TipoIncompatible, EtiquetaInvalida {
+        if (!(tipoDato == Integer.class || tipoDato == Double.class || tipoDato == Boolean.class || tipoDato == String.class || tipoDato == null)) {
+            throw new TipoIncompatible("Tipo de dato no soportado. Solo se permiten: Numérico (entero, real), Booleano y Cadena.");
+        }
+        
+        if (getCantidadFilas() != celdas.size()) {
+            throw new IllegalArgumentException("El número de celdas proporcionadas no coincide con el número de filas existentes.");
+        }
+        
+        Columna nuevaColumna = new Columna(etiqueta, tipoDato);
+        
+        for (Object valor : celdas) {
+            // Verificar que el valor corresponde al tipo especificado
+            if (valor != null && !tipoDato.isInstance(valor)) {
+                throw new TipoIncompatible("El valor '" + valor + "' no es compatible con el tipo de dato de la columna " + tipoDato.getSimpleName());
+            }
+            nuevaColumna.agregarValor(valor);
+        }
+        
+        columnas.add(nuevaColumna);
+        indicesColumnas.put(etiqueta, columnas.size() - 1);
+    }
+    
     public void eliminarFila(int idFila) throws EtiquetaInvalida {
         if (idFila < 0 || idFila >= getCantidadFilas()) {
             throw new EtiquetaInvalida("El ID de la fila no existe.");
@@ -547,7 +564,6 @@ public class Tabla implements Visualizacion {
         }
     }
     
-
     public void seleccionar(List<String> etiquetasColumnas, List<Integer> indicesFilas, int maxAnchoCelda) throws EtiquetaInvalida {
         // Validar que las etiquetas de columnas existan
         if (maxAnchoCelda < 1) {
@@ -626,9 +642,6 @@ public class Tabla implements Visualizacion {
         }
     }
     
-    
-    
-
     public void head(int n) {
         mostrar(n, getCantidadColumnas(), 10, 0);
     }
@@ -766,7 +779,6 @@ public class Tabla implements Visualizacion {
         }
         return false;
     }
-
 
     public Tabla hacerCopiaProfunda(Tabla tabla) throws TipoIncompatible, EtiquetaInvalida {
         // Crear una matriz que incluya espacio para las filas y las etiquetas
@@ -922,7 +934,6 @@ public class Tabla implements Visualizacion {
     
         return tablaOrdenada;
     }
-    
 
     @Override
     public void muestrear(double porcentaje, int maxAnchoCelda) {
