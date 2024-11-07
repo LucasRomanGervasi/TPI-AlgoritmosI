@@ -154,16 +154,15 @@ public class Main {
                 
 
                 case 3:
-                    System.out.print("Ingrese los elementos de la secuencia (separados por comas): ");
+                    System.out.print("Ingrese los elementos de la secuencia (cada fila separada por comas, y columnas por ';'): ");
                     String inputSecuencia = scanner.nextLine();
                     
-                    List<Object> secuencia = new ArrayList<>();
-                    List<Object> fila = Arrays.stream(inputSecuencia.split(","))
-                        .map(String::trim)
-                        .collect(Collectors.toList());
+                    // Dividir las filas
+                    List<Object> secuencia = Arrays.stream(inputSecuencia.split(","))
+                                                   .map(String::trim)
+                                                   .map(fila -> Arrays.asList(fila.split(";")))
+                                                   .collect(Collectors.toList());
                     
-                    secuencia.add(fila); 
-                
                     return new Tabla(secuencia);
 
                 default:
