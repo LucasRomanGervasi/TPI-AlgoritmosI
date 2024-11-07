@@ -9,6 +9,7 @@ import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
     private static boolean tablaIngresadaManual = false;
@@ -33,15 +34,16 @@ public class Main {
                         System.out.println("1. Modificar valor en una tabla");
                         System.out.println("2. Eliminar columna");
                         System.out.println("3. Eliminar fila");
-                        System.out.println("4. Mostrar primeras filas (head)");
-                        System.out.println("5. Mostrar últimas filas (tail)");
-                        System.out.println("6. Concatenar tablas");
-                        System.out.println("7. Crear copia profunda");
-                        System.out.println("8. Filtrar tabla");
-                        System.out.println("9. Ordenar tabla");
-                        System.out.println("10. Muestrear tabla");
-                        System.out.println("11. Eliminar valores NA");
-                        System.out.println("12. Agrupar tabla");
+                        System.out.println("4. Seleccionar filas y columnas (Select)");
+                        System.out.println("5. Mostrar primeras filas (head)");
+                        System.out.println("6. Mostrar últimas filas (tail)");
+                        System.out.println("7. Concatenar tablas");
+                        System.out.println("8. Crear copia profunda");
+                        System.out.println("9. Filtrar tabla");
+                        System.out.println("10. Ordenar tabla");
+                        System.out.println("11. Muestrear tabla");
+                        System.out.println("12. Eliminar valores NA");
+                        System.out.println("13. Agrupar tabla");
                         System.out.println("0. Salir");
 
                         System.out.print("Ingrese su opción: ");
@@ -143,7 +145,13 @@ public class Main {
                     System.out.print("¿Desea incluir headers? (true/false): ");
                     boolean incluirHeaders = scanner.nextBoolean();
                     scanner.nextLine(); // Consumir nueva línea
-                    return new Tabla(rutaCSV, incluirHeaders);
+                    
+                    System.out.print("Ingrese el número máximo de caracteres por celda: ");
+                    int maxCaracteresPorCelda = scanner.nextInt();
+                    scanner.nextLine(); // Consumir nueva línea
+                    
+                    return new Tabla(rutaCSV, incluirHeaders, maxCaracteresPorCelda);
+                
 
                 case 3:
                     System.out.print("Ingrese los elementos de la secuencia (separados por comas): ");
@@ -300,8 +308,62 @@ public class Main {
                 System.out.println("Tabla después de eliminar la fila:");
                 tabla.mostrar(5, 5, 10, 0);
                 break;
-
             case 4:
+                System.out.println("Tabla actual:");
+                tabla.mostrar(5, 5, 10, 0);
+            
+                // Pedir columnas a seleccionar
+                scanner.nextLine();
+                System.out.print("Ingrese las columnas a seleccionar (separadas por comas): ");
+                String columnasInput = scanner.nextLine().trim();
+                
+                if (columnasInput.isEmpty()) {
+                    System.out.println("Error: Debe ingresar al menos una columna para seleccionar.");
+                    break;
+                }
+            
+                List<String> columnasSeleccionadas = Arrays.stream(columnasInput.split(",\\s*"))
+                                                           .collect(Collectors.toList());
+            
+                // Pedir filas a seleccionar con validación de números
+                System.out.print("Ingrese los índices de las filas a seleccionar (separados por comas, o deje vacío para seleccionar todas): ");
+
+                String filasInput = scanner.nextLine().trim();
+                List<Integer> filasSeleccionadas;
+            
+                if (filasInput.isEmpty()) {
+                    // Seleccionar todas las filas si no se especifica ninguna
+                    filasSeleccionadas = IntStream.range(0, tabla.getCantidadFilas())
+                                                  .boxed()
+                                                  .collect(Collectors.toList());
+                } else {
+                    try {
+                        filasSeleccionadas = Arrays.stream(filasInput.split(",\\s*"))
+                                                   .map(Integer::parseInt)
+                                                   .collect(Collectors.toList());
+                    } catch (NumberFormatException e) {
+                        System.out.println("Error: Los índices de fila deben ser números enteros.");
+                        break;
+                    }
+                }
+            
+                System.out.print("Ingrese el ancho máximo de la celda: ");
+                
+                // Verificación y manejo del ancho máximo de la celda
+                int maxAnchoCelda;
+                try {
+                    maxAnchoCelda = scanner.nextInt();
+                    scanner.nextLine(); // Limpiar el buffer después de leer un número
+                } catch (InputMismatchException e) {
+                    System.out.println("Error: Debe ingresar un número entero para el ancho de la celda.");
+                    scanner.nextLine(); // Limpiar el buffer en caso de error
+                    break;
+                }
+            
+                    tabla.seleccionar(columnasSeleccionadas, filasSeleccionadas, maxAnchoCelda);
+                break;
+            
+            case 5:
                 System.out.print("Ingrese la cantidad de filas a mostrar (head): ");
                 int nHead = scanner.nextInt();
                 if (nHead <= 0 || nHead > tabla.getCantidadFilas()) {
@@ -311,7 +373,7 @@ public class Main {
                 tabla.head(nHead);
                 break;
 
-            case 5:
+            case 6:
                 System.out.print("Ingrese la cantidad de filas a mostrar (tail): ");
                 int nTail = scanner.nextInt();
                 if (nTail <= 0 || nTail > tabla.getCantidadFilas()) {
@@ -321,7 +383,7 @@ public class Main {
                 tabla.tail(nTail);
                 break;
 
-            case 6:
+            case 7:
                  // Mostrar la tabla actual antes de la concatenación
                  System.out.println("Tabla actual:");
                  tabla.mostrar(5, 5, 10, 0);
@@ -353,7 +415,7 @@ public class Main {
                  }
                  break;
             
-            case 7:
+            case 8:
                 // Verificar si la tabla actual es nula antes de intentar hacer una copia profunda
                 if (tabla == null) {
                     System.out.println("Error: No se puede hacer una copia profunda porque la tabla actual es nula.");
@@ -364,7 +426,7 @@ public class Main {
                 }
                 break;
             
-            case 8:
+            case 9:
                 // Mostrar las columnas disponibles para filtrar
                 System.out.println("Columnas disponibles para filtrar:");
                 List<Object> columnasDisponibles = tabla.getEtiquetasColumnas();
@@ -391,59 +453,59 @@ public class Main {
 
                 break;
             
-                case 9:
-                    System.out.println("Tabla actual:");
-                    tabla.mostrar(5, 5, 10, 0);
-                    
-                    System.out.println("Etiquetas de columnas disponibles para ordenar:");
-                    System.out.println(tabla.getEtiquetasColumnas());
-                    
-                    scanner.nextLine();
-                    System.out.print("Ingrese las etiquetas de las columnas para ordenar (separadas por comas): ");
-                    String etiquetasInput = scanner.nextLine();
-                    List<String> etiquetas = Arrays.stream(etiquetasInput.split(",\\s*"))
-                                                    .collect(Collectors.toList());
-                    
-                    List<Boolean> ordenAscendente = new ArrayList<>();
-                    boolean etiquetasValidas = true; // Bandera para verificar si se ingresaron etiquetas válidas
-                    
-                    for (String etiqueta : etiquetas) {
-                        if (!tabla.getEtiquetasColumnas().contains(etiqueta)) {
-                            System.out.println("Etiqueta inválida: " + etiqueta + ". Operación cancelada.");
-                            etiquetasValidas = false; // Marcar que hay etiquetas inválidas
-                            continue; // Cambiado a continue para seguir pidiendo etiquetas válidas
-                        }
-                        
-                        while (true) {
-                            System.out.print("¿Desea ordenar la columna '" + etiqueta + "' de manera ascendente (true) o descendente (false)? Ingrese true o false: ");
-                            String ordenInput = scanner.nextLine().trim();
-                            if (ordenInput.equalsIgnoreCase("true")) {
-                                ordenAscendente.add(true);
-                                break;
-                            } else if (ordenInput.equalsIgnoreCase("false")) {
-                                ordenAscendente.add(false);
-                                break;
-                            } else {
-                                System.out.println("Entrada no válida. Por favor, ingrese 'true' para ascendente o 'false' para descendente.");
-                            }
-                        }
-                    }
-                    
-                    if (!etiquetasValidas) { // Verificar si no se ingresó ninguna orden
-                        System.out.println("No se realizó ninguna ordenación debido a etiquetas inválidas");
-                        break; // Salir del caso 9 si no se tiene nada que ordenar
-                    }
-                    if (ordenAscendente.isEmpty()) {
-                        System.out.println("No se realizó ninguna ordenación debido a falta de criterios de ordenamiento");
-                        break;
-                    }
-                    
-                    Tabla tablaOrdenada = tabla.ordenar(tabla, etiquetas, ordenAscendente);
-                    System.out.println("\nTabla después de ordenar:");
-                    tablaOrdenada.mostrar(5, 5, 10, 0);
-                    break;
-
             case 10:
+                System.out.println("Tabla actual:");
+                tabla.mostrar(5, 5, 10, 0);
+                
+                System.out.println("Etiquetas de columnas disponibles para ordenar:");
+                System.out.println(tabla.getEtiquetasColumnas());
+                
+                scanner.nextLine();
+                System.out.print("Ingrese las etiquetas de las columnas para ordenar (separadas por comas): ");
+                String etiquetasInput = scanner.nextLine();
+                List<String> etiquetas = Arrays.stream(etiquetasInput.split(",\\s*"))
+                                                .collect(Collectors.toList());
+                
+                List<Boolean> ordenAscendente = new ArrayList<>();
+                boolean etiquetasValidas = true; // Bandera para verificar si se ingresaron etiquetas válidas
+                
+                for (String etiqueta : etiquetas) {
+                    if (!tabla.getEtiquetasColumnas().contains(etiqueta)) {
+                        System.out.println("Etiqueta inválida: " + etiqueta + ". Operación cancelada.");
+                        etiquetasValidas = false; // Marcar que hay etiquetas inválidas
+                        continue; // Cambiado a continue para seguir pidiendo etiquetas válidas
+                    }
+                    
+                    while (true) {
+                        System.out.print("¿Desea ordenar la columna '" + etiqueta + "' de manera ascendente (true) o descendente (false)? Ingrese true o false: ");
+                        String ordenInput = scanner.nextLine().trim();
+                        if (ordenInput.equalsIgnoreCase("true")) {
+                            ordenAscendente.add(true);
+                            break;
+                        } else if (ordenInput.equalsIgnoreCase("false")) {
+                            ordenAscendente.add(false);
+                            break;
+                        } else {
+                            System.out.println("Entrada no válida. Por favor, ingrese 'true' para ascendente o 'false' para descendente.");
+                        }
+                    }
+                }
+                
+                if (!etiquetasValidas) { // Verificar si no se ingresó ninguna orden
+                    System.out.println("No se realizó ninguna ordenación debido a etiquetas inválidas");
+                    break; // Salir del caso 9 si no se tiene nada que ordenar
+                }
+                if (ordenAscendente.isEmpty()) {
+                    System.out.println("No se realizó ninguna ordenación debido a falta de criterios de ordenamiento");
+                    break;
+                }
+                
+                Tabla tablaOrdenada = tabla.ordenar(tabla, etiquetas, ordenAscendente);
+                System.out.println("\nTabla después de ordenar:");
+                tablaOrdenada.mostrar(5, 5, 10, 0);
+                break;
+
+            case 11:
                 System.out.println("Tabla actual:");
                 tabla.mostrar(5, 5, 10, 0);
 
@@ -452,7 +514,7 @@ public class Main {
                 tabla.muestrear(porcentaje, 10);
                 break;
 
-            case 11:
+            case 12:
                 if (tablaIngresadaManual) {
                     // Mostrar y eliminar NA si la tabla fue ingresada manualmente
                     System.out.println("Tabla antes de eliminar valores NA:");
@@ -480,7 +542,7 @@ public class Main {
                 break;
             
 
-                case 12:
+                case 13:
                 if (tablaIngresadaManual) {
                     // Mostrar y agrupar si la tabla fue ingresada manualmente
                     System.out.println("Seleccione la operación para agrupar:");
@@ -528,7 +590,7 @@ public class Main {
                             etiquetasAgrupamiento.add(etiquetasDisponibles.get(idx).toString());
                     }
             
-                    Tabla tablaAgrupada = tabla.agregarPor(etiquetasAgrupamiento, operacion);
+                    Tabla tablaAgrupada = tabla.agruparPor(etiquetasAgrupamiento, operacion);
                     System.out.println("Tabla agrupada:");
                     tablaAgrupada.mostrar(5, 5, 10, 0);
                 } else {
@@ -594,7 +656,7 @@ public class Main {
                             etiquetasAgrupamiento.add(etiquetasDisponibles.get(idx).toString());
                     }
             
-                    Tabla tablaAgrupada = tablaAgrupar.agregarPor(etiquetasAgrupamiento, operacion);
+                    Tabla tablaAgrupada = tablaAgrupar.agruparPor(etiquetasAgrupamiento, operacion);
                     System.out.println("Tabla agrupada:");
                     tablaAgrupada.mostrar(5, 5, 10, 0);
                 }

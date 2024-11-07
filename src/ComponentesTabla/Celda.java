@@ -14,9 +14,9 @@ public class Celda<T> {
         this.valor = (T) valor2;
     }
 
-    public boolean esNA() {
+    /* public boolean esNA() {
         return valor == null;
-    }
+    } */
 
     @Override
     public String toString() {

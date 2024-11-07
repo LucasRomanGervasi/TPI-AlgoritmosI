@@ -1,7 +1,6 @@
 package ComponentesTabla;
 import java.util.ArrayList;
 import java.util.List;
-
 import Excepciones.TipoIncompatible;
 
 public class Columna<T> {
@@ -71,16 +70,16 @@ public class Columna<T> {
     }
 
     // Obtener el tamaño de la columna (cantidad de valores)
-    public int getTamanio() {
+    /* public int getTamanio() {
         return celdas.size();
-    }
+    } */
 
     // Completar la columna con valores null hasta un tamaño específico
-    public void rellenarConNull(int nuevoTamanio) {
+    /* public void rellenarConNull(int nuevoTamanio) {
         while (celdas.size() < nuevoTamanio) {
             celdas.add(null);
         }
-    }
+    } */
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
