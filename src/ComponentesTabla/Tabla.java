@@ -21,9 +21,9 @@ public class Tabla implements Visualizacion {
     }
 
     // Constructor desde archivo CSV
-    public Tabla(String rutaArchivoCSV, boolean headers) {
+    public Tabla(String rutaArchivoCSV, boolean headers, int maxCaracteresPorCelda) {
         try {
-            crearDesdeArchivoCSV(rutaArchivoCSV, headers);
+            crearDesdeArchivoCSV(rutaArchivoCSV, headers, maxCaracteresPorCelda);
         } catch (IOException e) {
             System.err.println("Error de IO al leer el archivo CSV: " + e.getMessage());
         } catch (TipoIncompatible | EtiquetaInvalida e) {
@@ -163,7 +163,7 @@ public class Tabla implements Visualizacion {
     
     
     
-    private void crearDesdeArchivoCSV(String rutaArchivoCSV, boolean headers) throws IOException, TipoIncompatible, EtiquetaInvalida {
+    private void crearDesdeArchivoCSV(String rutaArchivoCSV, boolean headers, int maxCaracteresPorCelda) throws IOException, TipoIncompatible, EtiquetaInvalida {
         if (rutaArchivoCSV == null || rutaArchivoCSV.isEmpty()) {
             throw new IllegalArgumentException("La ruta del archivo CSV no puede estar vacía.");
         }
@@ -216,11 +216,18 @@ public class Tabla implements Visualizacion {
             agregarFila();
             for (int col = 0; col < numColumnas; col++) {
                 String valor = datos.get(fila).get(col);
+    
+                // Limitar la cantidad de caracteres por celda
+                if (valor != null && valor.length() > maxCaracteresPorCelda) {
+                    valor = valor.substring(0, maxCaracteresPorCelda); // Truncar a maxCaracteresPorCelda
+                }
+    
                 Object valorConvertido = (valor == null || valor.isEmpty()) ? null : convertirValor(valor, columnas.get(col).getTipoDato());
                 setValorCelda(fila - 1, etiquetas.get(col), valorConvertido);
             }
         }
     }
+    
     
     // Método auxiliar para generar etiquetas en caso de no tener encabezados
     private List<String> generarEtiquetas(int numColumnas) {
@@ -351,12 +358,12 @@ public class Tabla implements Visualizacion {
         return fila;
     }
 
-        public Columna<?> getColumna(Object etiqueta) throws EtiquetaInvalida {
-                    if (!indicesColumnas.containsKey(etiqueta)) {
-                        throw new EtiquetaInvalida("La etiqueta de la columna no existe.");
-                    }
-                    return columnas.get(indicesColumnas.get(etiqueta));
-        }
+    public Columna<?> getColumna(Object etiqueta) throws EtiquetaInvalida {
+                if (!indicesColumnas.containsKey(etiqueta)) {
+                    throw new EtiquetaInvalida("La etiqueta de la columna no existe.");
+                }
+                return columnas.get(indicesColumnas.get(etiqueta));
+    }
 
     public Object getCelda(int idFila, Object etiquetaColumna) throws EtiquetaInvalida {
         if (idFila < 0 || idFila >= getCantidadFilas()) {
@@ -543,6 +550,10 @@ public class Tabla implements Visualizacion {
 
     public void seleccionar(List<String> etiquetasColumnas, List<Integer> indicesFilas, int maxAnchoCelda) throws EtiquetaInvalida {
         // Validar que las etiquetas de columnas existan
+        if (maxAnchoCelda < 1) {
+            throw new IllegalArgumentException("El ancho de celda debe ser mayor o igual a 1.");
+            
+        }
         List<Integer> columnasASeleccionar = new ArrayList<>();
         for (String etiqueta : etiquetasColumnas) {
             if (!indicesColumnas.containsKey(etiqueta)) {
@@ -913,25 +924,6 @@ public class Tabla implements Visualizacion {
     }
     
 
-    // Método auxiliar para reordenar las filas basado en la lista de índices ordenados
-    private void reordenarFilasSegunIndices(List<Integer> indicesFilas) throws TipoIncompatible, EtiquetaInvalida {
-        List<List<Object>> filasOrdenadas = new ArrayList<>();
-    
-        // Crear una nueva lista de filas reordenada según los índices
-        for (int filaIndex : indicesFilas) {
-            filasOrdenadas.add(getFila(filaIndex));
-        }
-    
-        // Reemplazar las filas originales con las filas ordenadas
-        for (int i = 0; i < filasOrdenadas.size(); i++) {
-            for (int j = 0; j < columnas.size(); j++) {
-                columnas.get(j).setValor(i, filasOrdenadas.get(i).get(j));
-            }
-        }
-    }
-    
-    
-
     @Override
     public void muestrear(double porcentaje, int maxAnchoCelda) {
         if (porcentaje < 0 || porcentaje > 100) {
@@ -985,7 +977,7 @@ public class Tabla implements Visualizacion {
         SUMA, MAXIMO, MINIMO, CUENTA, MEDIA, VARIANZA, DESVIO
     }
 
-    public Tabla agregarPor(List<String> columnasAgrupamiento, Operacion operacion) throws TipoIncompatible, EtiquetaInvalida {
+    public Tabla agruparPor(List<String> columnasAgrupamiento, Operacion operacion) throws TipoIncompatible, EtiquetaInvalida {
         if (columnasAgrupamiento == null || columnasAgrupamiento.isEmpty()) {
             throw new IllegalArgumentException("Las columnas de agrupamiento no pueden estar vacías.");
         }
