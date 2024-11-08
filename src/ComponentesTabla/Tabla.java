@@ -659,14 +659,14 @@ public class Tabla implements Visualizacion {
     // Método filtrar sin cambios
     public Tabla filtrar(String query) throws EtiquetaInvalida, TipoIncompatible {
         List<Object[]> filasSeleccionadas = new ArrayList<>();
-
+    
         Object[] etiquetas = new Object[getCantidadColumnas()];
         for (int j = 0; j < getCantidadColumnas(); j++) {
             etiquetas[j] = columnas.get(j).getEtiquetaColumna();
         }
-
+    
         filasSeleccionadas.add(etiquetas);
-
+    
         for (int i = 0; i < getCantidadFilas(); i++) {
             if (evaluarFila(i, query)) {
                 Object[] valorFila = new Object[getCantidadColumnas()];
@@ -676,14 +676,14 @@ public class Tabla implements Visualizacion {
                 filasSeleccionadas.add(valorFila);
             }
         }
-
+    
         if (filasSeleccionadas.size() == 1) {
             throw new IllegalArgumentException("No se encontraron filas que coincidan con los criterios de filtrado.");
         }
-
+    
         return new Tabla(filasSeleccionadas.toArray(new Object[0][]));
     }
-
+    
     private boolean evaluarFila(int fila, String query) throws EtiquetaInvalida {
         List<String> condiciones = new ArrayList<>();
         List<String> operadoresLogicos = new ArrayList<>();
@@ -742,21 +742,20 @@ public class Tabla implements Visualizacion {
         return esNegada ? !resultadoCondicion : resultadoCondicion;
     }
     
-
     private boolean evaluarCondicionSimple(int fila, String condicion) throws EtiquetaInvalida {
         String[] partes = condicion.split(" ");
         if (partes.length != 3) {
             throw new IllegalArgumentException("Condición no válida: " + condicion);
         }
-
+    
         String columna = partes[0];
         String operador = partes[1];
         String valorStr = partes[2];
-
+    
         Object valorCelda = getCelda(fila, columna);
         return evaluarCondicion(valorCelda, operador, valorStr);
     }
-
+    
     private boolean evaluarCondicion(Object valorCelda, String operador, String valorComparacion) {
         if (valorCelda instanceof Number) {
             double valor = Double.parseDouble(valorCelda.toString());
@@ -775,10 +774,15 @@ public class Tabla implements Visualizacion {
             boolean valorComp = Boolean.parseBoolean(valorComparacion);
             return valor == valorComp;
         } else if (valorCelda instanceof String) {
-            return operador.equals("=") && valorCelda.equals(valorComparacion);
+            switch (operador) {
+                case "=": return valorCelda.equals(valorComparacion);
+                case "!=": return !valorCelda.equals(valorComparacion);
+                default: throw new IllegalArgumentException("Operador no soportado para String: " + operador);
+            }
         }
         return false;
     }
+    
 
     public Tabla hacerCopiaProfunda(Tabla tabla) throws TipoIncompatible, EtiquetaInvalida {
         // Crear una matriz que incluya espacio para las filas y las etiquetas

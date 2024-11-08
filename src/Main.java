@@ -105,9 +105,9 @@ public class Main {
         if (eleccion == 1) {
             Object[][] datosEjemplo = {
                 {"Nombre", "Edad", "Altura"},
-                {"Lucas", 25, 1.80},
-                {"Ana", 30, 1.65},
-                {"Juan", 28, 1.75}
+                {"Lucas", 25, 1.85},
+                {"Ana", 30, 1.75},
+                {"Juan", 28, 1.65}
             };
             tablaIngresadaManual = false;
             System.out.println("Tabla de ejemplo cargada.");
