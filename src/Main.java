@@ -584,7 +584,7 @@ public class Main {
                 // Realizar el filtrado y mostrar la tabla resultante
                 Tabla tablaFiltrada = tabla.filtrar(condicion);
                 System.out.println("Tabla después de aplicar el filtro:");
-                tablaFiltrada.mostrar(5, 5, 30, 0);
+                tablaFiltrada.mostrar(5, 5, 10, 0);
 
                 break;
             
