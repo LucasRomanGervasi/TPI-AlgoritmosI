@@ -164,10 +164,10 @@ public class Tabla implements Visualizacion {
         if (rutaArchivoCSV == null || rutaArchivoCSV.isEmpty()) {
             throw new IllegalArgumentException("La ruta del archivo CSV no puede estar vacía.");
         }
-    
-        columnas = new ArrayList<>(); // Inicializar la lista de columnas
-        indicesColumnas = new HashMap<>(); // Inicializar el mapa de índices
-    
+
+        columnas = new ArrayList<>();
+        indicesColumnas = new HashMap<>();
+
         List<List<String>> datos = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(rutaArchivoCSV))) {
             String linea;
@@ -176,63 +176,77 @@ public class Tabla implements Visualizacion {
                 datos.add(Arrays.asList(valores));
             }
         }
-    
+
         if (datos.isEmpty()) {
             throw new IOException("El archivo CSV está vacío.");
         }
-    
-        // Generar etiquetas de columna: usar la primera fila si headers es true, o etiquetas vacías si es false
-        List<String> etiquetas = headers ? datos.remove(0) : generarEtiquetasVacias(datos.get(0).size());
+
+        // Si no hay encabezados, eliminamos la primera fila (que sería la de encabezados)
+        if (!headers && !datos.isEmpty()) {
+            datos.remove(0); // Eliminar la primera fila
+        }
+
+        // Generar etiquetas para las columnas: si no hay encabezados, usamos etiquetas vacías
+        List<String> etiquetas = headers ? datos.remove(0) : generarEtiquetasUnicas(datos.get(0).size());
         int numColumnas = etiquetas.size();
-    
-        // Asignar tipo de dato según el primer valor no nulo de cada columna
+
+        // Si no hay encabezados, reemplazamos las etiquetas con espacios vacíos incrementales
+        if (!headers) {
+            for (int i = 0; i < numColumnas; i++) {
+                etiquetas.set(i, " ".repeat(i)); // Reemplazar con espacios vacíos incrementales
+            }
+        }
+
+        // Agregar las columnas con las etiquetas adecuadas
         for (int col = 0; col < numColumnas; col++) {
-            String etiqueta = etiquetas.get(col).isEmpty() ? "" : etiquetas.get(col);
+            String etiqueta = etiquetas.get(col);
             Class<?> tipoDato = null;
-    
-            // Determinar el tipo de dato usando el primer valor no nulo de la columna
+
             for (int fila = 0; fila < datos.size(); fila++) {
                 String valor = datos.get(fila).get(col);
                 if (valor != null && !valor.isEmpty()) {
                     Class<?> tipoActual = inferirTipoDato(valor);
                     if (tipoDato == null) {
-                        tipoDato = tipoActual; // Asignar el primer tipo encontrado
+                        tipoDato = tipoActual;
                     } else if (!tipoDato.equals(tipoActual)) {
-                        tipoDato = String.class; // Si hay una discrepancia, definir tipo como String
+                        tipoDato = String.class;
                         break;
                     }
                 }
             }
-    
+
             agregarColumna(etiqueta, tipoDato);
         }
-    
-        // Agregar filas y setear valores en la tabla
+
+        // Ahora agregamos las filas, ya sin la primera fila (si fue eliminada)
         for (int fila = 0; fila < datos.size(); fila++) {
             agregarFila();
             for (int col = 0; col < numColumnas; col++) {
                 String valor = datos.get(fila).get(col);
-    
-                // Limitar la cantidad de caracteres por celda
+
                 if (valor != null && valor.length() > maxCaracteresPorCelda) {
-                    valor = valor.substring(0, maxCaracteresPorCelda); // Truncar a maxCaracteresPorCelda
+                    valor = valor.substring(0, maxCaracteresPorCelda);
                 }
-    
-                Object valorConvertido = (valor == null || valor.isEmpty()) ? null : convertirValor(valor, columnas.get(col).getTipoDato());
+
+                Object valorConvertido = (valor == null || valor.isEmpty()) 
+                    ? null 
+                    : convertirValor(valor, columnas.get(col).getTipoDato());
                 setValorCelda(fila, columnas.get(col).getEtiquetaColumna(), valorConvertido);
             }
         }
-    }
-    
-    // Método auxiliar para generar etiquetas vacías en caso de no tener encabezados
-    private List<String> generarEtiquetasVacias(int numColumnas) {
+        }
+
+
+    private List<String> generarEtiquetasUnicas(int numColumnas) {
         List<String> etiquetas = new ArrayList<>();
         for (int i = 0; i < numColumnas; i++) {
-            etiquetas.add(""); // Etiqueta vacía para cada columna
+            // Generar etiquetas con espacios en blanco
+            String etiqueta = " ".repeat(i); // " ", "  ", "   ", etc.
+            etiquetas.add(etiqueta);
         }
         return etiquetas;
     }
-    
+
     // Método auxiliar para inferir el tipo de dato de un valor en formato String
     private Class<?> inferirTipoDato(String valor) {
         try {
