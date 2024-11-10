@@ -1104,7 +1104,39 @@ public class Tabla implements Visualizacion {
         }
         throw new IllegalArgumentException("Columna no encontrada: " + nombreColumna);
     }
+
+    public void guardar(String path) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))) {
+            // Escribir las etiquetas de las columnas como encabezado
+            List<Object> etiquetas = getEtiquetasColumnas();
+            for (int i = 0; i < etiquetas.size(); i++) {
+                writer.write(etiquetas.get(i).toString());
+                if (i < etiquetas.size() - 1) writer.write(",");
+            }
+            writer.newLine();
     
+            // Escribir los datos de las filas
+            for (int i = 0; i < getCantidadFilas(); i++) {
+                for (int j = 0; j < etiquetas.size(); j++) {
+                    String etiqueta = etiquetas.get(j).toString();
+                    try {
+                        // Obtener la celda y escribir su valor
+                        Object valor = getCelda(i, etiqueta);
+                        writer.write(valor != null ? valor.toString() : "");
+                    } catch (EtiquetaInvalida e) {
+                        System.out.println("Error: La etiqueta '" + etiqueta + "' no existe en la tabla.");
+                        writer.write("");  // Escribir un valor vacío si la etiqueta es inválida
+                    }
+                    if (j < etiquetas.size() - 1) writer.write(",");
+                }
+                writer.newLine();
+            }
+            System.out.println("Tabla guardada en " + path);
+        } catch (IOException e) {
+            System.out.println("Error al guardar el archivo: " + e.getMessage());
+        }
+    
+    }
 }
 
 
