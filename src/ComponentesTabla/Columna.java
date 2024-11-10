@@ -69,17 +69,6 @@ public class Columna<T> {
         celdas.remove(index);
     }
 
-    // Obtener el tamaño de la columna (cantidad de valores)
-    /* public int getTamanio() {
-        return celdas.size();
-    } */
-
-    // Completar la columna con valores null hasta un tamaño específico
-    /* public void rellenarConNull(int nuevoTamanio) {
-        while (celdas.size() < nuevoTamanio) {
-            celdas.add(null);
-        }
-    } */
 
     public String toString() {
         StringBuilder sb = new StringBuilder();

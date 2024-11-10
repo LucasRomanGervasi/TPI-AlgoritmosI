@@ -165,7 +165,7 @@ public class Tabla implements Visualizacion {
             throw new IllegalArgumentException("La ruta del archivo CSV no puede estar vacía.");
         }
     
-        columnas = new ArrayList<>();  // Inicializar la lista de columnas
+        columnas = new ArrayList<>(); // Inicializar la lista de columnas
         indicesColumnas = new HashMap<>(); // Inicializar el mapa de índices
     
         List<List<String>> datos = new ArrayList<>();
@@ -181,18 +181,17 @@ public class Tabla implements Visualizacion {
             throw new IOException("El archivo CSV está vacío.");
         }
     
-        // Asumir la primera fila como las etiquetas de las columnas
-        List<String> etiquetas = headers ? datos.get(0) : generarEtiquetas(datos.get(0).size());
+        // Generar etiquetas de columna: usar la primera fila si headers es true, o etiquetas vacías si es false
+        List<String> etiquetas = headers ? datos.remove(0) : generarEtiquetasVacias(datos.get(0).size());
         int numColumnas = etiquetas.size();
     
         // Asignar tipo de dato según el primer valor no nulo de cada columna
         for (int col = 0; col < numColumnas; col++) {
-            String etiqueta = etiquetas.get(col);
+            String etiqueta = etiquetas.get(col).isEmpty() ? "" : etiquetas.get(col);
             Class<?> tipoDato = null;
-            boolean tipoUniforme = true;
     
             // Determinar el tipo de dato usando el primer valor no nulo de la columna
-            for (int fila = 1; fila < datos.size(); fila++) {
+            for (int fila = 0; fila < datos.size(); fila++) {
                 String valor = datos.get(fila).get(col);
                 if (valor != null && !valor.isEmpty()) {
                     Class<?> tipoActual = inferirTipoDato(valor);
@@ -200,7 +199,7 @@ public class Tabla implements Visualizacion {
                         tipoDato = tipoActual; // Asignar el primer tipo encontrado
                     } else if (!tipoDato.equals(tipoActual)) {
                         tipoDato = String.class; // Si hay una discrepancia, definir tipo como String
-                        tipoUniforme = false; // Marcar como no uniforme
+                        break;
                     }
                 }
             }
@@ -208,8 +207,8 @@ public class Tabla implements Visualizacion {
             agregarColumna(etiqueta, tipoDato);
         }
     
-        // Validar los tipos de datos en la columna
-        for (int fila = 1; fila < datos.size(); fila++) {
+        // Agregar filas y setear valores en la tabla
+        for (int fila = 0; fila < datos.size(); fila++) {
             agregarFila();
             for (int col = 0; col < numColumnas; col++) {
                 String valor = datos.get(fila).get(col);
@@ -220,20 +219,20 @@ public class Tabla implements Visualizacion {
                 }
     
                 Object valorConvertido = (valor == null || valor.isEmpty()) ? null : convertirValor(valor, columnas.get(col).getTipoDato());
-                setValorCelda(fila - 1, etiquetas.get(col), valorConvertido);
+                setValorCelda(fila, columnas.get(col).getEtiquetaColumna(), valorConvertido);
             }
         }
     }
     
-    // Método auxiliar para generar etiquetas en caso de no tener encabezados
-    private List<String> generarEtiquetas(int numColumnas) {
+    // Método auxiliar para generar etiquetas vacías en caso de no tener encabezados
+    private List<String> generarEtiquetasVacias(int numColumnas) {
         List<String> etiquetas = new ArrayList<>();
-        for (int i = 1; i <= numColumnas; i++) {
-            etiquetas.add("Columna" + i);
+        for (int i = 0; i < numColumnas; i++) {
+            etiquetas.add(""); // Etiqueta vacía para cada columna
         }
         return etiquetas;
     }
-
+    
     // Método auxiliar para inferir el tipo de dato de un valor en formato String
     private Class<?> inferirTipoDato(String valor) {
         try {
@@ -263,6 +262,7 @@ public class Tabla implements Visualizacion {
             throw new TipoIncompatible("Tipo de dato no compatible para la conversión: " + tipo.getSimpleName());
         }
     }
+    
 
     private void crearDesdeSecuenciaLineal(List<Object> secuenciaLineal) throws TipoIncompatible, EtiquetaInvalida {
         if (secuenciaLineal == null || secuenciaLineal.isEmpty()) {
@@ -484,7 +484,7 @@ public class Tabla implements Visualizacion {
         indicesColumnas.put(etiqueta, columnas.size() - 1);
     }
 
-    /* public <T> void agregarColumna(String etiqueta, Class<T> tipoDato, List<Object> celdas) throws TipoIncompatible, EtiquetaInvalida {
+    public <T> void agregarColumna(String etiqueta, Class<T> tipoDato, List<Object> celdas) throws TipoIncompatible, EtiquetaInvalida {
         if (!(tipoDato == Integer.class || tipoDato == Double.class || tipoDato == Boolean.class || tipoDato == String.class || tipoDato == null)) {
             throw new TipoIncompatible("Tipo de dato no soportado. Solo se permiten: Numérico (entero, real), Booleano y Cadena.");
         }
@@ -505,7 +505,7 @@ public class Tabla implements Visualizacion {
         
         columnas.add(nuevaColumna);
         indicesColumnas.put(etiqueta, columnas.size() - 1);
-    } */
+    }
     
     public void eliminarFila(int idFila) throws EtiquetaInvalida {
         if (idFila < 0 || idFila >= getCantidadFilas()) {
