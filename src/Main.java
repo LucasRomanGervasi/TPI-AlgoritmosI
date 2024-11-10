@@ -32,18 +32,20 @@ public class Main {
                     while (continuarOperaciones) {
                         System.out.println("Seleccione una operación:");
                         System.out.println("1. Modificar valor en una tabla");
-                        System.out.println("2. Eliminar columna");
-                        System.out.println("3. Eliminar fila");
-                        System.out.println("4. Seleccionar filas y columnas (Select)");
-                        System.out.println("5. Mostrar primeras filas (head)");
-                        System.out.println("6. Mostrar últimas filas (tail)");
-                        System.out.println("7. Concatenar tablas");
-                        System.out.println("8. Crear copia profunda");
-                        System.out.println("9. Filtrar tabla");
-                        System.out.println("10. Ordenar tabla");
-                        System.out.println("11. Muestrear tabla");
-                        System.out.println("12. Eliminar valores NA");
-                        System.out.println("13. Agrupar tabla");
+                        System.out.println("2. Agregar columna");
+                        System.out.println("3. Agregar fila");
+                        System.out.println("4. Eliminar columna");
+                        System.out.println("5. Eliminar fila");
+                        System.out.println("6. Seleccionar filas y columnas (Select)");
+                        System.out.println("7. Mostrar primeras filas (head)");
+                        System.out.println("8. Mostrar últimas filas (tail)");
+                        System.out.println("9. Concatenar tablas");
+                        System.out.println("10. Crear copia profunda");
+                        System.out.println("11. Filtrar tabla");
+                        System.out.println("12. Ordenar tabla");
+                        System.out.println("13. Muestrear tabla");
+                        System.out.println("14. Eliminar valores NA");
+                        System.out.println("15. Agrupar tabla");
                         System.out.println("0. Salir");
 
                         System.out.print("Ingrese su opción: ");
@@ -256,8 +258,142 @@ public class Main {
                 tabla.mostrar(5, 5, 10, 0);
             
                 break;
-            
             case 2:
+                System.out.println("Tabla actual antes de agregar la columna:");
+                tabla.mostrar(5, 5, 10, 0);
+            
+                System.out.print("¿Desea agregar una etiqueta a la columna? (s/n): ");
+                String opcionEtiqueta = scanner.next().trim().toLowerCase();
+                scanner.nextLine(); // Limpieza del buffer para evitar problemas con nextLine() más adelante
+            
+                String etiquetaColumna = "";
+                if ("s".equals(opcionEtiqueta)) {
+                    System.out.print("Ingrese la etiqueta para la nueva columna: ");
+                    etiquetaColumna = scanner.nextLine();
+                }
+            
+                System.out.print("Ingrese el tipo de dato de la columna (Integer, Double, Boolean, String): ");
+                String tipoDatoStr = scanner.next();
+                scanner.nextLine(); // Limpieza del buffer después de scanner.next()
+                Class<?> tipoDatoColumnas = null;
+            
+                // Determinar el tipo de dato de la columna
+                switch (tipoDatoStr.toLowerCase()) {
+                    case "integer":
+                        tipoDatoColumnas = Integer.class;
+                        break;
+                    case "double":
+                        tipoDatoColumnas = Double.class;
+                        break;
+                    case "boolean":
+                        tipoDatoColumnas = Boolean.class;
+                        break;
+                    case "string":
+                        tipoDatoColumnas = String.class;
+                        break;
+                    default:
+                        System.out.println("Tipo de dato no válido. Operación cancelada.");
+                        return; // Salimos del caso si el tipo de dato no es válido
+                }
+            
+                // Crear la lista de celdas con los valores de la nueva columna
+                List<Object> celdasColumna = new ArrayList<>();
+                System.out.println("Ingrese los valores para cada fila de la nueva columna:");
+                for (int i = 0; i < tabla.getCantidadFilas(); i++) {
+                    System.out.print("Valor para la fila " + i + ": ");
+                    String valorStr = scanner.nextLine();
+                    Object valor = null;
+            
+                    try {
+                        // Convertir el valor ingresado al tipo de dato adecuado
+                        if (tipoDatoColumnas == Integer.class) {
+                            valor = Integer.parseInt(valorStr);
+                        } else if (tipoDatoColumnas == Double.class) {
+                            valor = Double.parseDouble(valorStr);
+                        } else if (tipoDatoColumnas == Boolean.class) {
+                            valor = Boolean.parseBoolean(valorStr);
+                        } else if (tipoDatoColumnas == String.class) {
+                            valor = valorStr;
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Valor no válido para el tipo de dato de la columna.");
+                        return; // Salimos del caso si el valor ingresado no es válido
+                    }
+                    
+                    celdasColumna.add(valor);
+                }
+            
+                // Intentar agregar la nueva columna a la tabla
+                try {
+                    tabla.agregarColumna(etiquetaColumna, tipoDatoColumnas, celdasColumna);
+                    System.out.println("Tabla después de agregar la columna:");
+                    tabla.mostrar(5, 5, 10, 0);
+                } catch (TipoIncompatible | EtiquetaInvalida e) {
+                    System.out.println("Error al agregar la columna: " + e.getMessage());
+                }
+                break;
+            
+            case 3:
+                System.out.println("Tabla actual antes de agregar la fila:");
+                tabla.mostrar(5, 5, 10, 0);
+
+                List<Object> valoresFila = new ArrayList<>();
+                System.out.println("Ingrese los valores para la nueva fila:");
+                
+                for (int i = 0; i < tabla.getCantidadColumnas(); i++) {
+                    // Obtener la etiqueta de la columna en el índice actual
+                    String etiquetaColumnas = tabla.getEtiquetasColumnas().get(i).toString();
+                    
+                    // Obtener el tipo de dato de la columna utilizando la etiqueta
+                    Class<?> tipoDatoColumna = null;
+                    try {
+                        tipoDatoColumna = tabla.getTipoDatoColumna(etiquetaColumnas);
+                    } catch (EtiquetaInvalida e) {
+                        System.out.println("Error: " + e.getMessage());
+                        return;  // Salimos del caso si hay una etiqueta inválida
+                    }
+                    
+                    // Solicitar el valor para la columna
+                    System.out.print("Valor para la columna '" + etiquetaColumnas + "' (" + tipoDatoColumna.getSimpleName() + "): ");
+                    String valorStr = scanner.next();  // Usamos next() en vez de nextLine()
+                    Object valor = null;
+
+                    try {
+                        // Convertir el valor al tipo de dato correspondiente
+                        if (tipoDatoColumna == Integer.class) {
+                            valor = Integer.parseInt(valorStr);
+                        } else if (tipoDatoColumna == Double.class) {
+                            valor = Double.parseDouble(valorStr);
+                        } else if (tipoDatoColumna == Boolean.class) {
+                            valor = Boolean.parseBoolean(valorStr);
+                        } else if (tipoDatoColumna == String.class) {
+                            valor = valorStr;
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Valor no válido para el tipo de dato de la columna " + etiquetaColumnas);
+                        valoresFila.clear(); // Limpia los valores si se ingresa un dato inválido
+                        break;
+                    }
+                    
+                    valoresFila.add(valor);
+                }
+
+                // Solo intentar agregar la fila si todos los valores son válidos
+                if (!valoresFila.isEmpty()) {
+                    try {
+                        tabla.agregarFila(valoresFila);
+                        System.out.println("Tabla después de agregar la fila:");
+                        tabla.mostrar(5, 5, 10, 0);
+                    } catch (TipoIncompatible e) {
+                        System.out.println("Error al agregar la fila: " + e.getMessage());
+                    }
+                } else {
+                    System.out.println("Operación cancelada debido a datos inválidos.");
+                }
+                break;
+
+
+            case 4:
                 System.out.println("Tabla actual antes de eliminar la columna:");
                 tabla.mostrar(5, 5, 10, 0);
 
@@ -284,7 +420,7 @@ public class Main {
                 tabla.mostrar(5, 5, 10, 0);
                 break;
 
-            case 3:
+            case 5:
                 System.out.println("Tabla actual antes de eliminar la fila:");
                 tabla.mostrar(5, 5, 10, 0);
 
@@ -307,7 +443,7 @@ public class Main {
                 System.out.println("Tabla después de eliminar la fila:");
                 tabla.mostrar(5, 5, 10, 0);
                 break;
-            case 4:
+            case 6:
                 System.out.println("Tabla actual:");
                 tabla.mostrar(5, 5, 10, 0);
             
@@ -362,7 +498,7 @@ public class Main {
                     tabla.seleccionar(columnasSeleccionadas, filasSeleccionadas, maxAnchoCelda);
                 break;
             
-            case 5:
+            case 7:
                 System.out.print("Ingrese la cantidad de filas a mostrar (head): ");
                 int nHead = scanner.nextInt();
                 if (nHead <= 0 || nHead > tabla.getCantidadFilas()) {
@@ -372,7 +508,7 @@ public class Main {
                 tabla.head(nHead);
                 break;
 
-            case 6:
+            case 8:
                 System.out.print("Ingrese la cantidad de filas a mostrar (tail): ");
                 int nTail = scanner.nextInt();
                 if (nTail <= 0 || nTail > tabla.getCantidadFilas()) {
@@ -382,7 +518,7 @@ public class Main {
                 tabla.tail(nTail);
                 break;
 
-            case 7:
+            case 9:
                  // Mostrar la tabla actual antes de la concatenación
                  System.out.println("Tabla actual:");
                  tabla.mostrar(5, 5, 10, 0);
@@ -414,7 +550,7 @@ public class Main {
                  }
                  break;
             
-            case 8:
+            case 10:
                 // Verificar si la tabla actual es nula antes de intentar hacer una copia profunda
                 if (tabla == null) {
                     System.out.println("Error: No se puede hacer una copia profunda porque la tabla actual es nula.");
@@ -425,7 +561,7 @@ public class Main {
                 }
                 break;
             
-            case 9:
+            case 11:
                 // Mostrar las columnas disponibles para filtrar
                 System.out.println("Columnas disponibles para filtrar:");
                 List<Object> columnasDisponibles = tabla.getEtiquetasColumnas();
@@ -452,7 +588,7 @@ public class Main {
 
                 break;
             
-            case 10:
+            case 12:
                 System.out.println("Tabla actual:");
                 tabla.mostrar(5, 5, 10, 0);
                 
@@ -504,7 +640,7 @@ public class Main {
                 tablaOrdenada.mostrar(5, 5, 10, 0);
                 break;
 
-            case 11:
+            case 13:
                 System.out.println("Tabla actual:");
                 tabla.mostrar(5, 5, 10, 0);
 
@@ -513,7 +649,7 @@ public class Main {
                 tabla.muestrear(porcentaje, 10);
                 break;
 
-            case 12:
+            case 14:
                 if (tablaIngresadaManual) {
                     // Mostrar y eliminar NA si la tabla fue ingresada manualmente
                     System.out.println("Tabla antes de eliminar valores NA:");
@@ -541,7 +677,7 @@ public class Main {
                 break;
             
 
-                case 13:
+            case 15:
                 if (tablaIngresadaManual) {
                     // Mostrar y agrupar si la tabla fue ingresada manualmente
                     System.out.println("Seleccione la operación para agrupar:");
@@ -568,7 +704,7 @@ public class Main {
                     if (operacion == null) break;
             
                     System.out.println("Tabla a agrupar:");
-                    tabla.mostrar(10, 5, 10, 0);
+                    tabla.mostrar(15, 5, 10, 0);
             
                     System.out.println("Etiquetas de la tabla disponibles para agrupar:");
                     List<Object> etiquetasDisponibles = tabla.getEtiquetasColumnas();
@@ -634,7 +770,7 @@ public class Main {
                     if (operacion == null) break;
             
                     System.out.println("Tabla a agrupar:");
-                    tablaAgrupar.mostrar(10, 5, 10, 0);
+                    tablaAgrupar.mostrar(15, 5, 10, 0);
             
                     System.out.println("Etiquetas de la tabla disponibles para agrupar:");
                     List<Object> etiquetasDisponibles = tablaAgrupar.getEtiquetasColumnas();
@@ -657,7 +793,7 @@ public class Main {
             
                     Tabla tablaAgrupada = tablaAgrupar.agruparPor(etiquetasAgrupamiento, operacion);
                     System.out.println("Tabla agrupada:");
-                    tablaAgrupada.mostrar(5, 5, 10, 0);
+                    tablaAgrupada.mostrar(15, 5, 10, 0);
                 }
                 break;
         }

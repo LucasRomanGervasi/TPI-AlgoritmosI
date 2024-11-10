@@ -10,9 +10,9 @@ public class Celda<T> {
         return valor;
     }
 
-    public void setValor(Object valor2) {
+   /*  public void setValor(Object valor2) {
         this.valor = (T) valor2;
-    }
+    } */
 
     /* public boolean esNA() {
         return valor == null;
