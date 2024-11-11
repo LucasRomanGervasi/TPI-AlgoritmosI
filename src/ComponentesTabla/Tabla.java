@@ -262,7 +262,7 @@ public class Tabla implements Visualizacion {
     }
     
     // Método auxiliar para convertir un String al tipo de dato correspondiente
-    private Object convertirValor(String valor, Class<?> tipo) throws TipoIncompatible {
+    /* private Object convertirValor(String valor, Class<?> tipo) throws TipoIncompatible {
         if (valor == null || valor.isEmpty()) {
             return null; // o algún valor por defecto si lo necesitas
         }
@@ -275,7 +275,7 @@ public class Tabla implements Visualizacion {
         } else {
             throw new TipoIncompatible("Tipo de dato no compatible para la conversión: " + tipo.getSimpleName());
         }
-    }
+    } */
     
 
     private void crearDesdeSecuenciaLineal(List<Object> secuenciaLineal) throws TipoIncompatible, EtiquetaInvalida {
