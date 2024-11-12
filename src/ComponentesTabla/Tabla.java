@@ -261,22 +261,6 @@ public class Tabla implements Visualizacion {
         }
     }
     
-    // Método auxiliar para convertir un String al tipo de dato correspondiente
-    /* private Object convertirValor(String valor, Class<?> tipo) throws TipoIncompatible {
-        if (valor == null || valor.isEmpty()) {
-            return null; // o algún valor por defecto si lo necesitas
-        }
-        if (tipo == Integer.class) {
-            return Integer.parseInt(valor);
-        } else if (tipo == Boolean.class) {
-            return Boolean.parseBoolean(valor);
-        } else if (tipo == String.class) {
-            return valor;
-        } else {
-            throw new TipoIncompatible("Tipo de dato no compatible para la conversión: " + tipo.getSimpleName());
-        }
-    } */
-    
 
     private void crearDesdeSecuenciaLineal(List<Object> secuenciaLineal) throws TipoIncompatible, EtiquetaInvalida {
         if (secuenciaLineal == null || secuenciaLineal.isEmpty()) {

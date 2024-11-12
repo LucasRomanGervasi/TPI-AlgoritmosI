@@ -54,11 +54,6 @@ public class Columna<T> {
         celdas.set(index, nuevaCelda);
     }
 
-    /* public void agregarValor(T valor) {
-        Celda<T> nuevaCelda = new Celda<>(valor); // Crear una nueva instancia de Celda con el valor
-        celdas.add(nuevaCelda);  // Agregar la celda a la lista de celdas
-    } */
-
     // Obtener todos los valores de la columna
     public List<Celda<T>> getCeldas() {
         return celdas;
