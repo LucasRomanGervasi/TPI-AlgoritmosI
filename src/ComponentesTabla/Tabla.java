@@ -19,7 +19,6 @@ public class Tabla implements Visualizacion {
         }
     }
 
-    // Constructor desde archivo CSV
     public Tabla(String rutaArchivoCSV, boolean headers, int maxCaracteresPorCelda) {
         try {
             crearDesdeArchivoCSV(rutaArchivoCSV, headers, maxCaracteresPorCelda);
@@ -30,7 +29,6 @@ public class Tabla implements Visualizacion {
         }
     }
 
-    // Constructor desde secuencia lineal
     public Tabla(List<Object> secuenciaLineal) {
         try {
             crearDesdeSecuenciaLineal(secuenciaLineal);
@@ -60,7 +58,6 @@ public class Tabla implements Visualizacion {
             indicesColumnas.put(etiqueta, columnas.size() - 1);
         }
     
-        // Agregar filas a la tabla
         for (int i = 1; i < matriz.length; i++) {
             agregarFila();
             for (int j = 0; j < matriz[i].length; j++) {
@@ -111,7 +108,6 @@ public class Tabla implements Visualizacion {
         
             String valorStr = valor.toString();
             
-            // Verificar Integer
             if (esEntero) {
                 try {
                     Integer.parseInt(valorStr);
@@ -120,7 +116,6 @@ public class Tabla implements Visualizacion {
                 }
             }
     
-            // Verificar Double
             if (esDouble) {
                 try {
                     Double.parseDouble(valorStr);
@@ -129,7 +124,6 @@ public class Tabla implements Visualizacion {
                 }
             }
     
-            // Verificar Boolean
             if (esBoolean) {
                 if (!valorStr.equalsIgnoreCase("true") && !valorStr.equalsIgnoreCase("false")) {
                     esBoolean = false;
@@ -192,7 +186,7 @@ public class Tabla implements Visualizacion {
 
         // Si no hay encabezados, eliminamos la primera fila (que sería la de encabezados)
         if (!headers && !datos.isEmpty()) {
-            datos.remove(0); // Eliminar la primera fila
+            datos.remove(0);
         }
 
         // Generar etiquetas para las columnas: si no hay encabezados, usamos etiquetas vacías
@@ -295,9 +289,8 @@ public class Tabla implements Visualizacion {
                     throw new IllegalArgumentException("La fila tiene un número diferente de columnas al esperado.");
                 }
                 
-                agregarFila();  // Agrega una nueva fila vacía
+                agregarFila();
                 
-                // Rellenar las columnas con los valores de la fila
                 for (int i = 0; i < fila.size(); i++) {
                     String etiquetaColumna = "Columna" + (i + 1);
                     Object valor = fila.get(i);
@@ -387,11 +380,8 @@ public class Tabla implements Visualizacion {
     public void mostrar(int maxFilas, int maxColumnas, int maxAnchoCelda, int filaInicio) {
         int totalFilas = getCantidadFilas();
         int totalColumnas = getCantidadColumnas();
-        //System.out.println(totalFilas + " filas x " + totalColumnas + " columnas");
         int filasMostrar = Math.min(maxFilas, totalFilas - filaInicio); // Ajusta filas a mostrar desde filaInicio
         int columnasMostrar = Math.min(maxColumnas, totalColumnas); // Ajusta columnas a mostrar
-        //System.out.println(filasMostrar + " filas x " + columnasMostrar + " columnas");
-        // Imprimir etiquetas de columnas
         System.out.print(String.format("%-" + (maxAnchoCelda + 1) + "s", "")); // Espacio para las etiquetas de filas
         for (int i = 0; i < columnasMostrar; i++) {
             String etiqueta = columnas.get(i).getEtiquetaColumna();
@@ -546,11 +536,8 @@ public class Tabla implements Visualizacion {
     
         // Agregar un nuevo valor nulo en cada columna en la nueva fila
         for (Columna<?> columna : columnas) {
-            columna.agregarCelda(null); // Primero agrega al final
+            columna.agregarCelda(null);
         }
-        
-        // Se asegura que las celdas se manejen correctamente
-        // Asegúrate de que las columnas tengan la lógica para manejar el tamaño correcto
     }
 
     public void agregarFila(List<Object> valores) throws TipoIncompatible {
@@ -574,7 +561,6 @@ public class Tabla implements Visualizacion {
     }
     
     public void seleccionar(List<String> etiquetasColumnas, List<Integer> indicesFilas, int maxAnchoCelda) throws EtiquetaInvalida {
-        // Validar que las etiquetas de columnas existan
         if (maxAnchoCelda < 1) {
             throw new IllegalArgumentException("El ancho de celda debe ser mayor o igual a 1.");
             
@@ -587,7 +573,6 @@ public class Tabla implements Visualizacion {
             columnasASeleccionar.add(indicesColumnas.get(etiqueta));
         }
     
-        // Validar que los índices de filas sean válidos
         int totalFilas = getCantidadFilas();
         for (int indiceFila : indicesFilas) {
             if (indiceFila < 0 || indiceFila >= totalFilas) {
@@ -595,7 +580,6 @@ public class Tabla implements Visualizacion {
             }
         }
     
-        // Imprimir las etiquetas de las columnas seleccionadas
         System.out.print(String.format("%-" + (maxAnchoCelda + 1) + "s", "")); // Espacio para los IDs de las filas
         for (int indiceColumna : columnasASeleccionar) {
             String etiqueta = columnas.get(indiceColumna).getEtiquetaColumna();
@@ -603,7 +587,6 @@ public class Tabla implements Visualizacion {
         }
         System.out.println();
     
-        // Imprimir las filas seleccionadas
         for (int indiceFila : indicesFilas) {
             System.out.print(formatearTexto(indiceFila + "", maxAnchoCelda) + " "); // Imprime el ID de la fila
     
@@ -617,33 +600,26 @@ public class Tabla implements Visualizacion {
     }
 
     public void eliminarTodosNAs() {
-        // Recorrer cada columna y actualizar los valores que son NA o equivalentes
         for (Columna<?> columna : columnas) {
             for (int i = 0; i < columna.getCeldas().size(); i++) {
                 Object valor = columna.getValor(i);
-    
-                // Imprimir el valor para depuración
-                //System.out.println("Valor en la fila " + i + " de la columna " + columna.getEtiquetaColumna() + ": " + valor);
-    
-                // Verificar si el valor es null, "NA", "NAN", o "null"
+
                 if (valor == null || 
                     valor.equals("NA") || 
                     valor.equals("NAN") || 
                     valor.equals("null")) {
     
-                    // Intentar establecer el valor según el tipo de la columna
                     try {
                         if (columna.getTipoDato() == String.class) {
-                            columna.setValor(i, ""); // Establece el valor como cadena vacía
+                            columna.setValor(i, ""); 
                         } else if (columna.getTipoDato() == Integer.class) {
-                            columna.setValor(i, 0); // Establece el valor como 0
+                            columna.setValor(i, 0);
                         } else if (columna.getTipoDato() == Boolean.class) {
-                            columna.setValor(i, false); // Establece el valor como false
+                            columna.setValor(i, false);
                         } else if (columna.getTipoDato() == Double.class) {
-                            columna.setValor(i, 0.0); // Establece el valor como 0.0
+                            columna.setValor(i, 0.0);
                         }
                     } catch (TipoIncompatible e) {
-                        // Manejo de la excepción en caso de tipo incompatible
                         System.err.println("No se pudo establecer el valor vacío en la columna " + columna.getEtiquetaColumna() + ": " + e.getMessage());
                     }
                 }
@@ -657,15 +633,14 @@ public class Tabla implements Visualizacion {
 
     public void tail(int n) {
         int totalFilas = getCantidadFilas();
-        int filasDesde = Math.max(0, totalFilas - n); // Calcula desde dónde mostrar las filas (si n > totalFilas, comienza desde la fila 0)
-        int filasMostrar = Math.min(n, totalFilas);   // Asegura que no se muestren más filas que las existentes
+        int filasDesde = Math.max(0, totalFilas - n);
+        int filasMostrar = Math.min(n, totalFilas);   
         
         System.out.println("Mostrando las últimas " + filasMostrar + " filas:");
         
         mostrar(filasMostrar, getCantidadColumnas(), 10, filasDesde);
     }
 
-    // Método filtrar sin cambios
     public Tabla filtrar(String query) throws EtiquetaInvalida, TipoIncompatible {
         List<Object[]> filasSeleccionadas = new ArrayList<>();
     
@@ -794,33 +769,27 @@ public class Tabla implements Visualizacion {
     
 
     public Tabla hacerCopiaProfunda(Tabla tabla) throws TipoIncompatible, EtiquetaInvalida {
-        // Crear una matriz que incluya espacio para las filas y las etiquetas
         int totalFilas = tabla.getCantidadFilas();
         Object[][] matrizInicial = new Object[totalFilas + 1][tabla.getCantidadColumnas()]; // +1 para la fila de etiquetas
         
-        // Copiar las etiquetas de columna en la primera fila
         for (int i = 0; i < tabla.getCantidadColumnas(); i++) {
             matrizInicial[0][i] = tabla.columnas.get(i).getEtiquetaColumna();
         }
     
-        // Copiar los datos de las filas de la tabla original
         for (int i = 0; i < totalFilas; i++) {
             for (int j = 0; j < tabla.getCantidadColumnas(); j++) {
                 matrizInicial[i + 1][j] = tabla.columnas.get(j).getValor(i); // +1 para dejar espacio a la fila de etiquetas
             }
         }
     
-        // Crear la nueva tabla a partir de la matriz con etiquetas y datos copiados
         return new Tabla(matrizInicial);
     }
 
     public Tabla concatenar(Tabla otraTabla) throws TipoIncompatible, EtiquetaInvalida, DimensionesIncompatibles {
-        // Verificar que las dos tablas tienen el mismo número de columnas
         if (this.getCantidadColumnas() != otraTabla.getCantidadColumnas()) {
             throw new DimensionesIncompatibles("Las tablas no tienen la misma cantidad de columnas.");
         }
-    
-        // Verificar que las etiquetas de las columnas y los tipos coinciden
+
         for (int i = 0; i < this.getCantidadColumnas(); i++) {
             Object etiquetaThis = this.columnas.get(i).getEtiquetaColumna();
             Object etiquetaOtra = otraTabla.columnas.get(i).getEtiquetaColumna();
@@ -836,30 +805,25 @@ public class Tabla implements Visualizacion {
             }
         }
     
-        // Crear una nueva tabla para almacenar la concatenación, usando un formato de matriz
         int totalFilas = this.getCantidadFilas() + otraTabla.getCantidadFilas();
         Object[][] matrizInicial = new Object[totalFilas + 1][this.getCantidadColumnas()]; // +1 para la fila de etiquetas
     
-        // Agregar etiquetas de columna en la primera fila
         for (int j = 0; j < this.getCantidadColumnas(); j++) {
             matrizInicial[0][j] = this.columnas.get(j).getEtiquetaColumna();
         }
     
-        // Agregar las filas de la primera tabla
         for (int i = 0; i < this.getCantidadFilas(); i++) {
             for (int j = 0; j < this.getCantidadColumnas(); j++) {
                 matrizInicial[i + 1][j] = this.columnas.get(j).getValor(i); // +1 para compensar la fila de etiquetas
             }
         }
     
-        // Agregar las filas de la segunda tabla
         for (int i = 0; i < otraTabla.getCantidadFilas(); i++) {
             for (int j = 0; j < otraTabla.getCantidadColumnas(); j++) {
                 matrizInicial[this.getCantidadFilas() + i + 1][j] = otraTabla.columnas.get(j).getValor(i);
             }
         }
-    
-        // Crear la nueva tabla concatenada a partir de la matriz completa. 
+     
         return new Tabla(matrizInicial);
     }
 
@@ -929,7 +893,6 @@ public class Tabla implements Visualizacion {
     
         // Crear una nueva matriz con los valores ordenados
         Object[][] datosOrdenados = new Object[tabla.getCantidadFilas() + 1][tabla.getCantidadColumnas()]; // +1 para las etiquetas
-        // Agregar las etiquetas en la primera fila
         for (int i = 0; i < tabla.getCantidadColumnas(); i++) {
             datosOrdenados[0][i] = tabla.getEtiquetasColumnas().get(i);
         }
@@ -942,8 +905,6 @@ public class Tabla implements Visualizacion {
             }
         }
     
-        // Crear la nueva tabla utilizando la matriz ordenada
-        // Aquí se asume que el constructor de la clase Tabla acepta los datos (con etiquetas) como matriz
         Tabla tablaOrdenada = new Tabla(datosOrdenados);
     
         return tablaOrdenada;
@@ -958,7 +919,6 @@ public class Tabla implements Visualizacion {
         int totalFilas = getCantidadFilas();
         int totalColumnas = getCantidadColumnas();
     
-        // Calcular la cantidad de filas a muestrear en base al porcentaje
         int filasAMostrar = (int) Math.ceil((porcentaje / 100) * totalFilas);
         
         if (filasAMostrar == 0) {
@@ -966,7 +926,6 @@ public class Tabla implements Visualizacion {
             return;
         }
     
-        // Seleccionar índices de filas de forma aleatoria
         Random random = new Random();
         List<Integer> indicesAleatorios = new ArrayList<>();
         
@@ -977,7 +936,6 @@ public class Tabla implements Visualizacion {
             }
         }
     
-        // Imprimir etiquetas de columnas
         System.out.print(String.format("%-" + (maxAnchoCelda + 1) + "s", "")); // Espacio para las etiquetas de filas
         for (int i = 0; i < totalColumnas; i++) {
             String etiqueta = columnas.get(i).getEtiquetaColumna();
@@ -985,7 +943,6 @@ public class Tabla implements Visualizacion {
         }
         System.out.println();
     
-        // Imprimir las filas seleccionadas
         for (int indiceFila : indicesAleatorios) {
             System.out.print(formatearTexto(indiceFila + "", maxAnchoCelda) + " "); // Imprime el ID de la fila
     
@@ -1012,18 +969,15 @@ public class Tabla implements Visualizacion {
     
         // Agrupar filas según las columnas indicadas
         for (int i = 0; i < getCantidadFilas(); i++) {
-            List<Object> fila = getFila(i);  // Usamos List<Object> en lugar de Map<String, Object>
+            List<Object> fila = getFila(i); 
             String claveGrupo = generarClaveGrupo(fila, columnasAgrupamiento);
     
-            // Agregar la fila al grupo correspondiente
             grupos.computeIfAbsent(claveGrupo, k -> new ArrayList<>()).add(fila);
         }
     
-        // Crear la estructura de la tabla de resultados
         List<Object[]> datosResultado = new ArrayList<>();
         List<String> columnasNumericas = getColumnasNumericas(columnasAgrupamiento);
-    
-        // Generar la fila de etiquetas de columnas
+
         Object[] filaEtiquetas = new Object[columnasNumericas.size() + 1];
         filaEtiquetas[0] = "Grupo";
         for (int i = 0; i < columnasNumericas.size(); i++) {
@@ -1031,7 +985,6 @@ public class Tabla implements Visualizacion {
         }
         datosResultado.add(filaEtiquetas);
     
-        // Generar resultados para cada grupo
         for (Map.Entry<String, List<List<Object>>> entradaGrupo : grupos.entrySet()) {
             String claveGrupo = entradaGrupo.getKey();
             List<List<Object>> filasGrupo = entradaGrupo.getValue();
@@ -1046,10 +999,8 @@ public class Tabla implements Visualizacion {
             datosResultado.add(filaResultado);
         }
     
-        // Convertir datosResultado a una matriz Object[][]
         Object[][] matrizDatos = datosResultado.toArray(new Object[0][]);
     
-        // Crear una nueva instancia de Tabla y llamar a crearDesdeMatriz
         
         Tabla nuevaTabla = new Tabla(matrizDatos);
         return nuevaTabla;
@@ -1059,13 +1010,12 @@ public class Tabla implements Visualizacion {
     private String generarClaveGrupo(List<Object> fila, List<String> columnasAgrupamiento) {
         List<String> valores = new ArrayList<>();
         for (String columna : columnasAgrupamiento) {
-            int indice = getIndiceColumna(columna);  // Método para obtener el índice de la columna
+            int indice = getIndiceColumna(columna);
             valores.add(fila.get(indice).toString());
         }
         return String.join(", ", valores);
     }
     
-    // Obtener columnas numéricas que no están en las de agrupamiento
     private List<String> getColumnasNumericas(List<String> columnasAgrupamiento) {
         return columnas.stream()
             .filter(columna -> !columnasAgrupamiento.contains(columna.getEtiquetaColumna()) && 
@@ -1074,9 +1024,8 @@ public class Tabla implements Visualizacion {
             .collect(Collectors.toList());
     }
     
-    // Calcular la operación de agregación sobre la columna de un grupo
     private Object calcularOperacion(List<List<Object>> filasGrupo, String columna, Operacion operacion) throws TipoIncompatible {
-        int indiceColumna = getIndiceColumna(columna);  // Obtener índice de la columna
+        int indiceColumna = getIndiceColumna(columna);
         List<Double> valores = filasGrupo.stream()
             .map(fila -> fila.get(indiceColumna))
             .filter(Objects::nonNull)
@@ -1105,7 +1054,6 @@ public class Tabla implements Visualizacion {
         }
     }
     
-    // Método auxiliar para obtener el índice de una columna dado su nombre
     private int getIndiceColumna(String nombreColumna) {
         for (int i = 0; i < columnas.size(); i++) {
             if (columnas.get(i).getEtiquetaColumna().equals(nombreColumna)) {
@@ -1117,7 +1065,6 @@ public class Tabla implements Visualizacion {
 
     public void guardar(String path) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))) {
-            // Escribir las etiquetas de las columnas como encabezado
             List<Object> etiquetas = getEtiquetasColumnas();
             for (int i = 0; i < etiquetas.size(); i++) {
                 writer.write(etiquetas.get(i).toString());
@@ -1125,17 +1072,15 @@ public class Tabla implements Visualizacion {
             }
             writer.newLine();
     
-            // Escribir los datos de las filas
             for (int i = 0; i < getCantidadFilas(); i++) {
                 for (int j = 0; j < etiquetas.size(); j++) {
                     String etiqueta = etiquetas.get(j).toString();
                     try {
-                        // Obtener la celda y escribir su valor
                         Object valor = getCelda(i, etiqueta);
                         writer.write(valor != null ? valor.toString() : "");
                     } catch (EtiquetaInvalida e) {
                         System.out.println("Error: La etiqueta '" + etiqueta + "' no existe en la tabla.");
-                        writer.write("");  // Escribir un valor vacío si la etiqueta es inválida
+                        writer.write("");
                     }
                     if (j < etiquetas.size() - 1) writer.write(",");
                 }
