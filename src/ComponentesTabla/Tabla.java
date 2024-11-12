@@ -848,7 +848,7 @@ public class Tabla implements Visualizacion {
             }
         }
     
-        // Crear la nueva tabla concatenada a partir de la matriz completa
+        // Crear la nueva tabla concatenada a partir de la matriz completa. 
         return new Tabla(matrizInicial);
     }
 
