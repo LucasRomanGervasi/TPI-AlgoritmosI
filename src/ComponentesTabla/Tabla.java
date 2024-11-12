@@ -97,9 +97,18 @@ public class Tabla implements Visualizacion {
         for (int i = 1; i < matriz.length; i++) {
             Object valor = matriz[i][columnaIndex];
     
-            // Ignorar null, NA y NAN
-            if (valor == null || valor.equals("NA") || valor.equals("NAN")) continue;
-    
+            if (valor == null 
+            || (valor instanceof String && (
+                ((String) valor).equalsIgnoreCase("null") 
+                || ((String) valor).equalsIgnoreCase("NA") 
+                || ((String) valor).equalsIgnoreCase("NAN")
+            ))) {
+            continue;
+            }
+            if (valor instanceof String) {
+                valor = ((String) valor).toUpperCase();
+            }
+        
             String valorStr = valor.toString();
             
             // Verificar Integer
@@ -337,6 +346,7 @@ public class Tabla implements Visualizacion {
         return etiquetas;
     }
 
+    @SuppressWarnings("unchecked")
     public <T> Class<T> getTipoDatoColumna(String etiqueta) throws EtiquetaInvalida {
         if (!indicesColumnas.containsKey(etiqueta)) {
             throw new EtiquetaInvalida("La etiqueta de la columna no existe.");
@@ -491,6 +501,7 @@ public class Tabla implements Visualizacion {
             throw new IllegalArgumentException("El número de celdas proporcionadas no coincide con el número de filas existentes.");
         }
         
+        @SuppressWarnings({ "rawtypes", "unchecked" })
         Columna nuevaColumna = new Columna(etiqueta, tipoDato);
         
         for (Object valor : celdas) {
@@ -852,6 +863,7 @@ public class Tabla implements Visualizacion {
         return new Tabla(matrizInicial);
     }
 
+    @SuppressWarnings("unchecked")
     public Tabla ordenar(Tabla tabla, List<String> etiquetasColumnas, List<Boolean> ordenAscendente) throws EtiquetaInvalida, TipoIncompatible {
         // Validar que las etiquetas existen en la tabla
         for (String etiqueta : etiquetasColumnas) {

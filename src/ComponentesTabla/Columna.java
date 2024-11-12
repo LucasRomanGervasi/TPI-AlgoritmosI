@@ -8,7 +8,6 @@ public class Columna<T> {
     private List<Celda<T>> celdas;
     private Class<T> tipoDato;
 
-    // Constructor que inicializa la etiqueta y el tipo de dato
     public Columna(String etiqueta, Class<T> tipoDato) throws TipoIncompatible {
         this.etiqueta = etiqueta;
         this.celdas = new ArrayList<>();
@@ -20,7 +19,6 @@ public class Columna<T> {
         }
     }
 
-    // Método para verificar si el tipo es válido
     private boolean esTipoValido(Class<T> tipo) {
         return tipo == String.class || tipo == Integer.class  || tipo == Boolean.class || tipo == null || tipo == Double.class;
     }
@@ -29,17 +27,16 @@ public class Columna<T> {
         return celdas.get(index).getValor();
     }
 
-    // Obtener la etiqueta de la columna
     public String getEtiquetaColumna() {
         return etiqueta;
     }
 
-    // Obtener el tipo de dato de la columna
     public Class<T> getTipoDato() {
         return tipoDato;
     }
 
     public void agregarCelda(Object valor) {
+        @SuppressWarnings("unchecked")
         Celda<T> nuevaCelda = new Celda<>((T) valor); // Crea una nueva celda con el valor
         celdas.add(nuevaCelda); // Agrega la celda a la lista de celdas
     }
@@ -50,6 +47,7 @@ public class Columna<T> {
         if (valor != null && !tipoDato.isInstance(valor)) {
             throw new TipoIncompatible("El tipo de dato no es compatible con el tipo de la columna.");
         }
+        @SuppressWarnings("unchecked")
         Celda<T> nuevaCelda = new Celda<>((T) valor); // Crea una nueva instancia de Celda
         celdas.set(index, nuevaCelda);
     }
