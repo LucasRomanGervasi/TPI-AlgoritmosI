@@ -37,39 +37,33 @@ public class Columna<T> {
 
     public void agregarCelda(Object valor) {
         @SuppressWarnings("unchecked")
-        Celda<T> nuevaCelda = new Celda<>((T) valor); // Crea una nueva celda con el valor
-        celdas.add(nuevaCelda); // Agrega la celda a la lista de celdas
+        Celda<T> nuevaCelda = new Celda<>((T) valor);
+        celdas.add(nuevaCelda);
     }
     
-
-    // Establecer un valor en un índice específico de la columna
+    @SuppressWarnings("unchecked")
     public void setValor(int index, Object valor) throws TipoIncompatible {
         if (valor != null && !tipoDato.isInstance(valor)) {
             throw new TipoIncompatible("El tipo de dato no es compatible con el tipo de la columna.");
         }
-        @SuppressWarnings("unchecked")
-        Celda<T> nuevaCelda = new Celda<>((T) valor); // Crea una nueva instancia de Celda
+        Celda<T> nuevaCelda = new Celda<>((T) valor);
         celdas.set(index, nuevaCelda);
     }
 
-    // Obtener todos los valores de la columna
     public List<Celda<T>> getCeldas() {
         return celdas;
     }
 
-    // Eliminar un valor en un índice específico
     public void eliminarValor(int index) {
         celdas.remove(index);
     }
 
-
-    public String toString() {
+    public String toString() { //Lo usamos principalmente para debuggear, pero creimos util dejarlo
         StringBuilder sb = new StringBuilder();
         sb.append("Columna{etiqueta='").append(etiqueta).append("', datos=[");
         for (Celda<T> celda : celdas) {
-            sb.append(celda.toString()).append(", "); // Asumiendo que `Celda` tiene un método `toString`.
+            sb.append(celda.toString()).append(", ");
         }
-        // Eliminar la última coma y espacio
         if (celdas.size() > 0) {
             sb.setLength(sb.length() - 2);
         }

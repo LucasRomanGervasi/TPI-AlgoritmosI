@@ -11,7 +11,7 @@ public class Celda<T> {
     }
 
     @Override
-    public String toString() {
+    public String toString() { //Al igual que con columna, se uso para debuggear principalmente
         return valor != null ? valor.toString() : "null";
     }
 }

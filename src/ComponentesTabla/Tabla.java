@@ -252,14 +252,22 @@ public class Tabla implements Visualizacion {
 
     // Método auxiliar para inferir el tipo de dato de un valor en formato String
     private Class<?> inferirTipoDato(String valor) {
+        if (valor == null || valor.equalsIgnoreCase("NA") || valor.equalsIgnoreCase("NAN") || valor.equalsIgnoreCase("null")) {
+            return String.class;
+        }
         try {
             Integer.parseInt(valor);
             return Integer.class;
         } catch (NumberFormatException e1) {
-            if (valor.equalsIgnoreCase("true") || valor.equalsIgnoreCase("false")) {
-                return Boolean.class;
-            } else {
-                return String.class;
+            try {
+                Double.parseDouble(valor);
+                return Double.class;
+            } catch (NumberFormatException e2) {
+                if (valor.equalsIgnoreCase("true") || valor.equalsIgnoreCase("false")) {
+                    return Boolean.class;
+                } else {
+                    return String.class;
+                }
             }
         }
     }
@@ -603,21 +611,17 @@ public class Tabla implements Visualizacion {
         for (Columna<?> columna : columnas) {
             for (int i = 0; i < columna.getCeldas().size(); i++) {
                 Object valor = columna.getValor(i);
-
-                if (valor == null || 
-                    valor.equals("NA") || 
-                    valor.equals("NAN") || 
-                    valor.equals("null")) {
     
+                if (valor == null || valor.equals("NA") || valor.equals("NAN") || valor.equals("null")) {
                     try {
                         if (columna.getTipoDato() == String.class) {
-                            columna.setValor(i, ""); 
+                            columna.setValor(i, ""); // Para String, reemplaza con vacío
                         } else if (columna.getTipoDato() == Integer.class) {
-                            columna.setValor(i, 0);
+                            columna.setValor(i, 0); // Para Integer, reemplaza con 0
                         } else if (columna.getTipoDato() == Boolean.class) {
-                            columna.setValor(i, false);
+                            columna.setValor(i, false); // Para Boolean, reemplaza con false
                         } else if (columna.getTipoDato() == Double.class) {
-                            columna.setValor(i, 0.0);
+                            columna.setValor(i, 0.0); // Para Double, reemplaza con 0.0
                         }
                     } catch (TipoIncompatible e) {
                         System.err.println("No se pudo establecer el valor vacío en la columna " + columna.getEtiquetaColumna() + ": " + e.getMessage());
@@ -626,6 +630,9 @@ public class Tabla implements Visualizacion {
             }
         }
     }
+    
+    
+    
     
     public void head(int n) {
         mostrar(n, getCantidadColumnas(), 10, 0);
